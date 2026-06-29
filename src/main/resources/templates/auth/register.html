@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/header :: header-head}">
+    <title>Đăng ký - CinemaX</title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+<div th:replace="~{layout/header :: navbar}"></div>
+
+<div class="container my-5 py-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card bg-dark text-white border-secondary shadow-lg rounded-4 p-4">
+                <div class="card-body">
+                    <h3 class="card-title text-center fw-bold mb-4">Tạo Tài Khoản</h3>
+                    <form th:action="@{/register}" th:object="${userDto}" method="post">
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Họ và Tên</label>
+                            <input type="text" th:field="*{fullName}" class="form-control bg-secondary text-white border-0" id="fullName">
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" th:field="*{email}" class="form-control bg-secondary text-white border-0" id="email">
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Số điện thoại</label>
+                            <input type="text" th:field="*{phone}" class="form-control bg-secondary text-white border-0" id="phone">
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <input type="password" th:field="*{password}" class="form-control bg-secondary text-white border-0" id="password">
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        </div>
+                        <button type="submit" class="btn btn-accent w-100 py-2">Đăng Ký</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Đã có tài khoản? <a href="/login" class="text-danger">Đăng nhập</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/header :: header-head}">
+    <title>Đăng nhập - CinemaX</title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+<div th:replace="~{layout/header :: navbar}"></div>
+
+<div class="container my-auto py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card bg-dark text-white border-secondary shadow-lg rounded-4 p-4">
+                <div class="card-body">
+                    <h3 class="card-title text-center fw-bold mb-4">Đăng Nhập</h3>
+
+                    <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                        Tên đăng nhập hoặc mật khẩu không chính xác!
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-info" role="alert">
+                        Bạn đã đăng xuất thành công.
+                    </div>
+                    <div th:if="${param.registered}" class="alert alert-success" role="alert">
+                        Đăng ký tài khoản thành công! Vui lòng đăng nhập.
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email đăng nhập</label>
+                            <input type="email" class="form-control bg-secondary text-white border-0" id="email" name="email" placeholder="admin@movie.test" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control bg-secondary text-white border-0" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-accent w-100 py-2">Đăng Nhập</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Chưa có tài khoản? <a href="/register" class="text-danger">Đăng ký ngay</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+</body>
+</html>
