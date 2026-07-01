@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Lịch sử đặt vé</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+  <h2 class="mb-4">Lịch sử đặt vé của bạn</h2>
+
+  <!-- Thông báo từ Controller -->
+  <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+  <div th:if="${errorMsg}" class="alert alert-danger" th:text="${errorMsg}"></div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <table class="table table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+          <th>Mã Đơn</th>
+          <th>Phim</th>
+          <th>Rạp</th>
+          <th>Giờ chiếu</th>
+          <th>Tổng tiền</th>
+          <th>Trạng thái</th>
+          <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b : ${bookings}">
+          <td th:text="'#' + ${b.id}">#1</td>
+          <td th:text="${b.showtime.movie.title}">Lật Mặt 7</td>
+          <td th:text="${b.showtime.room.cinema.name}">Beta Mỹ Đình</td>
+          <td th:text="${#temporals.format(b.showtime.startTime, 'dd/MM/yyyy HH:mm')}">30/06/2026 20:00</td>
+          <td th:text="${#numbers.formatDecimal(b.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">100,000 VNĐ</td>
+          <td>
+            <!-- Badge trạng thái Bootstrap -->
+            <span th:if="${b.status == 'PENDING'}" class="badge bg-warning text-dark">Chờ thanh toán</span>
+            <span th:if="${b.status == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
+            <span th:if="${b.status == 'CANCELLED'}" class="badge bg-danger">Đã hủy</span>
+            <span th:if="${b.status == 'USED'}" class="badge bg-secondary">Đã sử dụng</span>
+          </td>
+          <td>
+            <!-- Nút Thanh toán tiếp nếu đang PENDING -->
+            <a th:if="${b.status == 'PENDING'}" th:href="@{/customer/payment/{id}(id=${b.id})}" class="btn btn-sm btn-primary">Thanh toán</a>
+
+            <!-- Form Hủy vé nếu đang PENDING -->
+            <form th:if="${b.status == 'PENDING'}" th:action="@{/customer/cancel}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này không?');">
+              <input type="hidden" name="bookingId" th:value="${b.id}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Hủy vé</button>
+            </form>
+
+            <!-- Nút Xem vé nếu đã PAID -->
+            <a th:if="${b.status == 'PAID'}" th:href="@{/customer/ticket/{id}(id=${b.id})}" class="btn btn-sm btn-success">Xem vé</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>
