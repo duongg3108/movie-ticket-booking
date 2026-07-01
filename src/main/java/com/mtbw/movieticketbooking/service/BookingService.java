@@ -15,13 +15,13 @@ public class BookingService {
     @Autowired
     private BookingRepository bookingRepository;
 
-    // UC06: Lấy danh sách lịch sử đặt vé của 1 user
+    //Lấy danh sách lịch sử đặt vé của 1 user
     public List<Booking> getBookingHistory(Long userId) {
         // Gọi đúng tên hàm mới
         return bookingRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
-    // UC10: Xử lý hủy vé PENDING
+    // Xử lý hủy vé PENDING
     public boolean cancelBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElse(null);
 
@@ -38,13 +38,13 @@ public class BookingService {
         return false;
     }
 
-    // UC05: Xử lý thanh toán thành công
+    // Xử lý thanh toán thành công
     public void updatePaymentSuccess(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElse(null);
 
         if (booking != null && BookingStatus.PENDING.equals(booking.getStatus())) {
             booking.setStatus(BookingStatus.PAID);
-            // Cập nhật thêm giờ thanh toán (giảng viên rất thích sự chi tiết này)
+            // Cập nhật thêm giờ thanh toán
             booking.setPaidAt(LocalDateTime.now());
             bookingRepository.save(booking);
         }

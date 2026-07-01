@@ -50,7 +50,6 @@
 
           <div class="ticket-cut"></div>
 
-          <!-- Mã QR giả lập (Có thể thay bằng ảnh tạo từ thư viện QR thật) -->
           <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TICKET_ID_" th:attrappend="src=${booking.id}" alt="QR Code" class="img-fluid mb-2">
           <p class="font-monospace fw-bold fs-5 tracking-widest mb-0" th:text="'TCK-' + ${booking.id}">TCK-1</p>
         </div>

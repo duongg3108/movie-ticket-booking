@@ -44,10 +44,9 @@ public class CustomerBookingController {
         return "customer/payment";
     }
 
-    // UC05.2: Xử lý bấm nút "Thanh toán" (Mockup)
+    //  Xử lý bấm nút "Thanh toán" (Mockup)
     @PostMapping("/pay")
     public String processPayment(@RequestParam("bookingId") Long bookingId, RedirectAttributes redirectAttributes) {
-        // Trong đồ án, bạn có thể gọi API VNPay ở đây.
         // Ở đây code giả lập thanh toán thành công luôn cho dễ báo cáo.
         bookingService.updatePaymentSuccess(bookingId);
         redirectAttributes.addFlashAttribute("successMsg", "Thanh toán thành công! Đây là vé điện tử của bạn.");
