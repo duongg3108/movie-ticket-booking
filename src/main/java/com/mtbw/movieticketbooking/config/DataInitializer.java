@@ -18,22 +18,22 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    private final UserRepository userRepository;
-    private final MovieRepository movieRepository;
-    private final PasswordEncoder passwordEncoder;
+        private final UserRepository userRepository;
+        private final MovieRepository movieRepository;
+        private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public void run(String... args) throws Exception {
-        // Data is seeded via SQL script by user, but fallback if empty:
-        if (userRepository.count() == 0) {
-            User admin = User.builder()
-                    .fullName("System Administrator")
-                    .email("admin@movie.test")
-                    .password(passwordEncoder.encode("123456"))
-                    .role(Role.ADMIN)
-                    .status(UserStatus.ACTIVE)
-                    .build();
-            userRepository.save(admin);
+        @Override
+        public void run(String... args) throws Exception {
+                // Data is seeded via SQL script by user, but fallback if empty:
+                if (userRepository.count() == 0) {
+                        User admin = User.builder()
+                                        .fullName("System Administrator")
+                                        .email("admin@movie.test")
+                                        .password(passwordEncoder.encode("123456"))
+                                        .role(Role.ADMIN)
+                                        .status(UserStatus.ACTIVE)
+                                        .build();
+                        userRepository.save(admin);
+                }
         }
-    }
 }

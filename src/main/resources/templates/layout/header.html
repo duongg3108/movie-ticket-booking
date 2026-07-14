@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head th:fragment="header-head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CinemaX - Movie Ticket Booking</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --bg-light: #ffffff;
@@ -17,6 +21,7 @@
             --text-muted: #6b7280;
             --border-color: #e5e7eb;
         }
+
         body {
             background-color: var(--bg-light);
             color: var(--text-main);
@@ -25,109 +30,160 @@
             display: flex;
             flex-direction: column;
         }
+
         .navbar-custom {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
+
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
             color: var(--accent) !important;
         }
+
         .nav-link {
             color: var(--text-main) !important;
             font-weight: 500;
-            transition: color 0.2s;
+            transition: color .2s;
         }
+
         .nav-link:hover {
             color: var(--accent) !important;
         }
+
         .btn-accent {
-            background: linear-gradient(135deg, #f43f5e, #fb7185);
-            color: #fff;
-            border: none;
-            font-weight: 600;
-            border-radius: 8px;
-            padding: 8px 20px;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg,#e11d48,#f43f5e);
+            color:#fff;
+            border:none;
+            font-weight:600;
+            border-radius:8px;
+            padding:8px 20px;
+            transition:.3s;
         }
-        .btn-accent:hover {
-            background: linear-gradient(135deg, #e11d48, #f43f5e);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
-            color: #fff;
+
+        .btn-accent:hover{
+            background:linear-gradient(135deg,#be123c,#e11d48);
+            transform:translateY(-2px);
+            box-shadow:0 4px 15px rgba(225,29,72,.3);
+            color:#fff;
         }
-        /* Nút Đăng nhập - viền tối màu trên nền sáng thay vì outline-light (vốn dành cho nền tối) */
-        .navbar-custom .btn-outline-light {
-            color: var(--text-main);
-            border-color: var(--border-color);
-            background-color: transparent;
+
+        .navbar-custom .btn-outline-light{
+            color:var(--text-main);
+            border-color:var(--border-color);
+            background:transparent;
         }
-        .navbar-custom .btn-outline-light:hover {
-            background-color: #f3f4f6;
-            color: var(--text-main);
-            border-color: var(--border-color);
+
+        .navbar-custom .btn-outline-light:hover{
+            background:#f3f4f6;
+            color:var(--text-main);
+            border-color:var(--border-color);
         }
-        /* Dropdown user menu - đồng bộ theme sáng */
-        .navbar-custom .dropdown-menu {
-            background-color: #ffffff;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+
+        .navbar-custom .dropdown-menu{
+            background:#fff;
+            border:1px solid var(--border-color);
+            box-shadow:0 4px 16px rgba(0,0,0,.08);
         }
-        .navbar-custom .dropdown-item {
-            color: var(--text-main);
+
+        .navbar-custom .dropdown-item{
+            color:var(--text-main);
         }
-        .navbar-custom .dropdown-item:hover {
-            background-color: #f3f4f6;
-            color: var(--text-main);
+
+        .navbar-custom .dropdown-item:hover{
+            background:#f3f4f6;
+            color:var(--text-main);
         }
-        .navbar-custom .dropdown-divider {
-            border-top: 1px solid var(--border-color);
+
+        .navbar-custom .dropdown-divider{
+            border-top:1px solid var(--border-color);
         }
     </style>
 </head>
+
 <body>
+
 <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="/home"><i class="fa-solid fa-film me-2"></i>CinemaX</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+        <a class="navbar-brand" href="/home">
+            <i class="fa-solid fa-film me-2"></i>CinemaX
+        </a>
+
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
+
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/home">Trang chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="/showtime">Lịch chiếu & Phim</a></li>
-                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link text-warning" href="/admin/movies"><i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Trang chủ</a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/showtime">Lịch chiếu & Phim</a>
+                </li>
+
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-warning" href="/admin/movies">
+                        <i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)
+                    </a>
+                </li>
+
                 <li class="nav-item" sec:authorize="hasRole('STAFF')">
-                    <a class="nav-link text-info" href="/staff/tickets"><i class="fa-solid fa-qrcode me-1"></i>Soát vé (Staff)</a>
+                    <a class="nav-link text-info" href="/staff/tickets">
+                        <i class="fa-solid fa-qrcode me-1"></i>Soát vé (Staff)
+                    </a>
                 </li>
             </ul>
+
             <div class="d-flex align-items-center gap-3">
+
                 <div sec:authorize="isAnonymous()">
                     <a href="/login" class="btn btn-outline-light me-2 btn-sm">Đăng nhập</a>
                     <a href="/register" class="btn btn-accent btn-sm">Đăng ký</a>
                 </div>
+
                 <div sec:authorize="isAuthenticated()" class="dropdown">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-user me-1"></i><span sec:authentication="name">User</span>
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle"
+                            type="button"
+                            data-bs-toggle="dropdown">
+                        <i class="fa-solid fa-user me-1"></i>
+                        <span sec:authentication="name">User</span>
                     </button>
+
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/booking/history">Lịch sử đặt vé</a></li>
+                        <li>
+                            <a class="dropdown-item" href="/booking/history">
+                                Lịch sử đặt vé
+                            </a>
+                        </li>
+
                         <li><hr class="dropdown-divider"></li>
+
                         <li>
                             <form th:action="@{/logout}" method="post">
-                                <button class="dropdown-item text-danger" type="submit"><i class="fa-solid fa-right-from-bracket me-1"></i>Đăng xuất</button>
+                                <button class="dropdown-item text-danger" type="submit">
+                                    <i class="fa-solid fa-right-from-bracket me-1"></i>
+                                    Đăng xuất
+                                </button>
                             </form>
                         </li>
                     </ul>
+
                 </div>
             </div>
+
         </div>
     </div>
 </nav>
+
 </body>
 </html>
