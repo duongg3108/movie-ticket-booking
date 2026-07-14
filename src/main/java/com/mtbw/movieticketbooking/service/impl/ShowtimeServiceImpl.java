@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,71 +28,135 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     private final ShowtimeRepository showtimeRepository;
 
+    // ===== Feature Showtime Management =====
+
+    @Override
+    public List<Showtime> findAll() {
+        return showtimeRepository.findAll();
+    }
+
+    @Override
+    public Optional<Showtime> findById(Long id) {
+        return showtimeRepository.findById(id);
+    }
+
+    @Override
+    public List<Showtime> findByMovieId(Long movieId) {
+        return showtimeRepository.findByMovieId(movieId);
+    }
+
+    @Override
+    public List<Showtime> findByCinemaId(Long cinemaId) {
+        return showtimeRepository.findByRoomCinemaId(cinemaId);
+    }
+
+    @Override
+    public List<Showtime> findByMovieIdAndStartTimeBetween(Long movieId,
+                                                           LocalDateTime start,
+                                                           LocalDateTime end) {
+        return showtimeRepository.findByMovieIdAndStartTimeBetween(movieId, start, end);
+    }
+
+    @Override
+    public Showtime save(Showtime showtime) {
+        return showtimeRepository.save(showtime);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        showtimeRepository.deleteById(id);
+    }
+
+    // ===== Feature Booking/Schedule =====
+
     @Override
     public List<MovieSchedule> getScheduleByCinemaAndDate(Long cinemaId, LocalDate date) {
+
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.plusDays(1).atStartOfDay();
 
-        List<Showtime> showtimes = showtimeRepository
-                .findByRoom_Cinema_IdAndStartTimeBetweenOrderByStartTimeAsc(cinemaId, start, end);
+        List<Showtime> showtimes =
+                showtimeRepository.findByRoom_Cinema_IdAndStartTimeBetweenOrderByStartTimeAsc(
+                        cinemaId, start, end);
 
-        // Buoc 1: gom theo movieId (khong dung Movie lam key truc tiep - tranh loi equals/hashCode)
         LinkedHashMap<Long, List<Showtime>> byMovieId = new LinkedHashMap<>();
         LinkedHashMap<Long, Movie> movieCache = new LinkedHashMap<>();
+
         for (Showtime s : showtimes) {
-            if (s.getStatus() == ShowtimeStatus.CANCELLED) continue;
+            if (s.getStatus() == ShowtimeStatus.CANCELLED) {
+                continue;
+            }
+
             Long movieId = s.getMovie().getId();
+
             byMovieId.computeIfAbsent(movieId, k -> new ArrayList<>()).add(s);
             movieCache.putIfAbsent(movieId, s.getMovie());
         }
 
-        // Buoc 2: voi moi phim, gom tiep theo screenType that su co trong DB (rooms.screen_type)
         List<MovieSchedule> result = new ArrayList<>();
+
         for (Long movieId : byMovieId.keySet()) {
+
             Movie movie = movieCache.get(movieId);
             List<Showtime> movieShowtimes = byMovieId.get(movieId);
 
-            LinkedHashMap<ScreenType, List<ShowtimeSlot>> byScreenType = new LinkedHashMap<>();
+            LinkedHashMap<ScreenType, List<ShowtimeSlot>> byScreenType =
+                    new LinkedHashMap<>();
+
             for (Showtime s : movieShowtimes) {
+
                 ScreenType type = s.getRoom().getScreenType();
+
                 ShowtimeSlot slot = new ShowtimeSlot(
                         s.getId(),
                         s.getStartTime().format(TIME_FMT),
                         formatPrice(s.getPrice())
                 );
+
                 byScreenType.computeIfAbsent(type, k -> new ArrayList<>()).add(slot);
             }
 
             List<ScreenGroup> groups = new ArrayList<>();
+
             for (ScreenType type : byScreenType.keySet()) {
-                groups.add(new ScreenGroup(screenTypeLabel(type), byScreenType.get(type)));
+                groups.add(new ScreenGroup(
+                        screenTypeLabel(type),
+                        byScreenType.get(type)
+                ));
             }
 
-            result.add(new MovieSchedule(movie, formatDuration(movie.getDurationMinutes()), groups));
+            result.add(new MovieSchedule(
+                    movie,
+                    formatDuration(movie.getDurationMinutes()),
+                    groups
+            ));
         }
 
         return result;
     }
+
     @Override
     public List<Showtime> findUpcomingByMovie(Long movieId) {
-        return showtimeRepository.findByMovie_IdAndStartTimeAfterAndStatusNotOrderByStartTimeAsc(
-                movieId, LocalDateTime.now(), ShowtimeStatus.CANCELLED
-        );
+        return showtimeRepository
+                .findByMovie_IdAndStartTimeAfterAndStatusNotOrderByStartTimeAsc(
+                        movieId,
+                        LocalDateTime.now(),
+                        ShowtimeStatus.CANCELLED
+                );
     }
 
     private String formatPrice(java.math.BigDecimal price) {
-        long thousand = price.longValue() / 1000;
-        return thousand + "K";
+        return price.longValue() / 1000 + "K";
     }
 
     private String formatDuration(int minutes) {
         int h = minutes / 60;
         int m = minutes % 60;
-        return h > 0 ? String.format("%dh%02d'", h, m) : String.format("%d'", m);
+        return h > 0
+                ? String.format("%dh%02d'", h, m)
+                : String.format("%d'", m);
     }
 
-    // Nhan hien thi cho tung loai phong - dich tu enum THAT trong DB (rooms.screen_type),
-    // khong bia them dinh dang khong ton tai trong schema.
     private String screenTypeLabel(ScreenType type) {
         return switch (type) {
             case STANDARD -> "Phòng chiếu 2D";
