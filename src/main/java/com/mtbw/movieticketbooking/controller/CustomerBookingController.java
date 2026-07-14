@@ -19,7 +19,7 @@ public class CustomerBookingController {
     @GetMapping("/history")
     public String viewHistory(Model model) {
         // Fix cứng userId = 1 để test, sau này ghép code với Người 1 thì lấy từ Spring Security
-        Long currentUserId = 1L;
+        Long currentUserId = 3L;
         model.addAttribute("bookings", bookingService.getBookingHistory(currentUserId));
         return "customer/booking-history";
     }
