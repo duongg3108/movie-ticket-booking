@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/admin-header :: admin-head}">
+    <title>Thêm/Sửa Lịch Chiếu - CinemaX Admin</title>
+</head>
+<body>
+<div th:replace="~{layout/admin-header :: admin-navbar}"></div>
+
+<main class="container-fluid px-4 py-4 fade-in">
+    <!-- ===== Page Header ===== -->
+    <div class="mb-4">
+        <a href="/admin/showtimes" class="text-muted text-decoration-none small d-inline-block mb-3" style="transition: color 0.2s;"
+           onmouseover="this.style.color='#e11d48'" onmouseout="this.style.color=''">
+            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách lịch chiếu
+        </a>
+        <h1 class="h3 fw-bold text-dark">
+            <i class="fa-solid fa-calendar-days me-2" style="color: #e11d48;"></i>
+            <span th:text="${isEdit ? 'Chỉnh Sửa Lịch Chiếu' : 'Thêm Lịch Chiếu Mới'}">Thêm Lịch Chiếu Mới</span>
+        </h1>
+        <p class="text-muted small" th:text="${isEdit ? 'Cập nhật thông tin chi tiết cho suất chiếu.' : 'Thiết lập thời gian chiếu, phòng chiếu và giá vé cho phim.'}"></p>
+    </div>
+
+    <!-- ===== Global Time Error ===== -->
+    <div th:if="${timeError}" class="alert alert-danger alert-dismissible fade show border-0 rounded-3 mb-4" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        <span th:text="${timeError}">Lỗi thời gian trùng lặp hoặc không hợp lệ!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ===== Form Content ===== -->
+    <form th:action="@{/admin/showtimes/save}" th:object="${showtime}" method="post">
+
+        <!-- Hidden ID field for update flow -->
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="row g-4">
+            <!-- ===== Left Column: Main Configuration ===== -->
+            <div class="col-lg-8">
+                <div class="admin-card p-4">
+                    <h5 class="fw-semibold text-dark mb-4"><i class="fa-solid fa-circle-info me-2 text-info"></i>Cấu hình suất chiếu</h5>
+
+                    <!-- Movie Select -->
+                    <div class="mb-4">
+                        <label for="movieId" class="form-label text-dark fw-semibold">Chọn phim <span class="text-danger">*</span></label>
+                        <select name="movieId" id="movieId" class="form-select" required>
+                            <option value="">-- Chọn phim chiếu --</option>
+                            <option th:each="m : ${movies}" th:value="${m.id}" th:text="${m.title}"
+                                    th:data-duration="${m.durationMinutes}"
+                                    th:selected="${showtime.movie != null and m.id == showtime.movie.id}"></option>
+                        </select>
+                        <div class="form-text text-muted small mt-1">
+                            <span id="selectedMovieDurationText" class="fw-semibold"></span>
+                        </div>
+                        <div class="text-danger small mt-1" th:if="${movieError}" th:text="${movieError}"></div>
+                    </div>
+
+                    <!-- Cinema & Room Select (Chained) -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="cinemaId" class="form-label text-dark fw-semibold">Chọn rạp chiếu <span class="text-danger">*</span></label>
+                            <select id="cinemaId" class="form-select" required>
+                                <option value="">-- Chọn rạp --</option>
+                                <option th:each="c : ${cinemas}" th:value="${c.id}" th:text="${c.name}"
+                                        th:selected="${selectedCinemaId != null and c.id == selectedCinemaId}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="roomId" class="form-label text-dark fw-semibold">Chọn phòng chiếu <span class="text-danger">*</span></label>
+                            <select name="roomId" id="roomId" class="form-select" required>
+                                <option value="">-- Chọn phòng --</option>
+                                <option th:each="r : ${rooms}" th:value="${r.id}" th:text="${r.name} + ' (' + ${r.screenType} + ')'"
+                                        th:data-cinema-id="${r.cinema.id}"
+                                        th:selected="${showtime.room != null and r.id == showtime.room.id}"></option>
+                            </select>
+                            <div class="text-danger small mt-1" th:if="${roomError}" th:text="${roomError}"></div>
+                        </div>
+                    </div>
+
+                    <!-- Start & End DateTime -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="startTime" class="form-label text-dark fw-semibold">Giờ bắt đầu <span class="text-danger">*</span></label>
+                            <input type="datetime-local" th:field="*{startTime}" class="form-control" id="startTime" required>
+                            <div class="text-danger small mt-1" th:if="${startTimeError}" th:text="${startTimeError}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endTime" class="form-label text-dark fw-semibold">Giờ kết thúc <span class="text-danger">*</span></label>
+                            <input type="datetime-local" th:field="*{endTime}" class="form-control" id="endTime" required>
+                            <div class="text-danger small mt-1" th:if="${endTimeError}" th:text="${endTimeError}"></div>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Price -->
+                    <div class="mb-4" style="max-width: 300px;">
+                        <label for="price" class="form-label text-dark fw-semibold">Giá vé (VNĐ) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" th:field="*{price}" class="form-control" id="price" min="0" step="1000" placeholder="VD: 90000" required>
+                            <span class="input-group-text bg-light text-dark fw-semibold">VNĐ</span>
+                        </div>
+                        <div class="text-danger small mt-1" th:if="${priceError}" th:text="${priceError}"></div>
+                    </div>
+
+                    <!-- Showtime Status -->
+                    <div class="mb-0" style="max-width: 300px;">
+                        <label for="status" class="form-label text-dark fw-semibold">Trạng thái suất chiếu</label>
+                        <select th:field="*{status}" class="form-select" id="status" required>
+                            <option th:each="st : ${statuses}" th:value="${st}"
+                                    th:text="${st.name() == 'OPEN' ? 'Mở bán vé (OPEN)' : (st.name() == 'SOLD_OUT' ? 'Hết vé (SOLD_OUT)' : (st.name() == 'CLOSED' ? 'Đóng bán vé (CLOSED)' : 'Hủy suất chiếu (CANCELLED)'))}"></option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ===== Right Column: Helper info & actions ===== -->
+            <div class="col-lg-4">
+                <!-- Guide Card -->
+                <div class="admin-card p-4 mb-4">
+                    <h5 class="fw-semibold text-dark mb-3">
+                        <i class="fa-solid fa-circle-question text-warning me-2"></i>Hướng dẫn nhanh
+                    </h5>
+                    <ul class="text-muted small ps-3 mb-0" style="line-height: 1.6;">
+                        <li class="mb-2"><strong>Chọn phim:</strong> Khi chọn phim, thời lượng phim sẽ tự động được hiển thị.</li>
+                        <li class="mb-2"><strong>Thời gian:</strong> Giờ kết thúc sẽ tự động tính toán bằng cách cộng thời lượng phim vào giờ bắt đầu để tối ưu hóa thao tác.</li>
+                        <li class="mb-2"><strong>Rạp & Phòng:</strong> Phòng chiếu sẽ lọc theo rạp chiếu tương ứng. Hãy chắc chắn chọn rạp trước.</li>
+                        <li><strong>Trùng lịch:</strong> Hệ thống sẽ tự động chặn nếu phòng chiếu đã có phim khác trùng thời gian.</li>
+                    </ul>
+                </div>
+
+                <!-- Actions Card -->
+                <div class="admin-card p-4">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-accent py-2">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>
+                            <span th:text="${isEdit ? 'Cập nhật lịch chiếu' : 'Lưu lịch chiếu'}">Lưu lịch chiếu</span>
+                        </button>
+                        <a href="/admin/showtimes" class="btn btn-outline-secondary py-2">
+                            <i class="fa-solid fa-xmark me-2"></i>Hủy bỏ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</main>
+
+<!-- Footer -->
+<footer class="mt-auto py-3" style="background-color: #f8f9fa; border-top: 1px solid rgba(0,0,0,0.1);">
+    <div class="container text-center text-muted small">
+        <p class="mb-0">&copy; 2026 CinemaX Admin Panel &middot; HSF302 Project</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const cinemaSelect = document.getElementById("cinemaId");
+        const roomSelect = document.getElementById("roomId");
+        const movieSelect = document.getElementById("movieId");
+        const startTimeInput = document.getElementById("startTime");
+        const endTimeInput = document.getElementById("endTime");
+        const movieDurationText = document.getElementById("selectedMovieDurationText");
+
+        // --- Room Dynamic Filter based on Cinema Selection ---
+        function filterRooms() {
+            const selectedCinemaId = cinemaSelect.value;
+            const roomOptions = roomSelect.options;
+            
+            let firstAvailableSelected = false;
+            let currentSelectedStillValid = false;
+            const currentSelectedValue = roomSelect.value;
+
+            for (let i = 0; i < roomOptions.length; i++) {
+                const option = roomOptions[i];
+                const optionCinemaId = option.getAttribute("data-cinema-id");
+
+                if (!optionCinemaId) {
+                    // Option: -- Chọn phòng --
+                    option.style.display = "";
+                    continue;
+                }
+
+                if (selectedCinemaId === "" || optionCinemaId === selectedCinemaId) {
+                    option.style.display = "";
+                    if (option.value === currentSelectedValue) {
+                        currentSelectedStillValid = true;
+                    }
+                } else {
+                    option.style.display = "none";
+                }
+            }
+
+            // Nếu phòng hiện tại không còn hiển thị thì đặt lại về trống
+            if (!currentSelectedStillValid) {
+                roomSelect.value = "";
+            }
+        }
+
+        cinemaSelect.addEventListener("change", filterRooms);
+        // Chạy filterRooms lần đầu (phục vụ flow Edit)
+        filterRooms();
+
+
+        // --- Auto Calculate End Time ---
+        function calculateEndTime() {
+            const selectedOption = movieSelect.options[movieSelect.selectedIndex];
+            const duration = selectedOption ? selectedOption.getAttribute("data-duration") : null;
+            const startTimeVal = startTimeInput.value;
+
+            if (duration) {
+                movieDurationText.textContent = `Thời lượng phim: ${duration} phút`;
+            } else {
+                movieDurationText.textContent = "";
+            }
+
+            if (!duration || !startTimeVal) {
+                return;
+            }
+
+            // Parse start date time
+            const startDate = new Date(startTimeVal);
+            if (isNaN(startDate.getTime())) {
+                return;
+            }
+
+            // Add duration minutes + 15 mins room cleaning buffer
+            const durationMinutes = parseInt(duration, 10);
+            const endDate = new Date(startDate.getTime() + (durationMinutes + 15) * 60 * 1000);
+
+            // Format end date to yyyy-MM-ddTHH:mm
+            const year = endDate.getFullYear();
+            const month = String(endDate.getMonth() + 1).padStart(2, '0');
+            const day = String(endDate.getDate()).padStart(2, '0');
+            const hours = String(endDate.getHours()).padStart(2, '0');
+            const minutes = String(endDate.getMinutes()).padStart(2, '0');
+
+            endTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        movieSelect.addEventListener("change", calculateEndTime);
+        startTimeInput.addEventListener("change", calculateEndTime);
+
+        // Chạy lần đầu nếu đã có dữ liệu phim
+        if (movieSelect.selectedIndex > 0) {
+            const selectedOption = movieSelect.options[movieSelect.selectedIndex];
+            const duration = selectedOption ? selectedOption.getAttribute("data-duration") : null;
+            if (duration) {
+                movieDurationText.textContent = `Thời lượng phim: ${duration} phút`;
+            }
+        }
+    });
+</script>
+</body>
+</html>
