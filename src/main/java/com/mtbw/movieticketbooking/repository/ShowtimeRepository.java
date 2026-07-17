@@ -1,6 +1,7 @@
 package com.mtbw.movieticketbooking.repository;
 
 import com.mtbw.movieticketbooking.entity.Showtime;
+import com.mtbw.movieticketbooking.enums.ShowtimeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +13,10 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
     List<Showtime> findByMovieId(Long movieId);
     List<Showtime> findByMovieIdAndStartTimeBetween(Long movieId, LocalDateTime start, LocalDateTime end);
     List<Showtime> findByRoomCinemaId(Long cinemaId);
+    List<Showtime> findByRoom_Cinema_IdAndStartTimeBetweenOrderByStartTimeAsc(
+            Long cinemaId, LocalDateTime start, LocalDateTime end
+    );
+    List<Showtime> findByMovie_IdAndStartTimeAfterAndStatusNotOrderByStartTimeAsc(
+            Long movieId, LocalDateTime from, ShowtimeStatus excludedStatus
+    );
 }
