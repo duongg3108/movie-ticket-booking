@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{layout/header :: header-head}"></th:block>
+    <title>Lịch Chiếu - CinemaX</title>
+    <style>
+        html body {
+            background-color: #ffffff !important;
+        }
+        main.container-fluid {
+            background-color: #ffffff;
+        }
+
+        /* ===== Cột danh sách (khu vực / rạp) ===== */
+        .schedule-col {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            max-height: 640px;
+            overflow-y: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .schedule-col h6 {
+            color: #6b7280;
+            letter-spacing: .04em;
+            font-weight: 700;
+        }
+        .schedule-col .list-group-item {
+            background-color: transparent;
+            color: #1f2937;
+            font-size: 0.92rem;
+            cursor: pointer;
+            border-radius: 8px;
+            margin: 2px 4px;
+            transition: background-color .15s ease, color .15s ease;
+        }
+        .schedule-col .list-group-item:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        .schedule-col .list-group-item.active-item {
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            color: #fff !important;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(244,63,94,0.35);
+        }
+        /* Badge số lượng rạp cạnh tên khu vực */
+        .city-badge {
+            background-color: #f3f4f6;
+            color: #374151;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border-radius: 999px;
+            min-width: 28px;
+            padding: 2px 8px;
+        }
+        .list-group-item.active-item .city-badge {
+            background-color: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
+        /* Header hệ thống rạp (chain) */
+        .chain-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 10px 4px 10px;
+            color: #4b5563;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+        .chain-header img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            border-radius: 4px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+        }
+        .chain-header i.fallback-icon {
+            width: 20px;
+            text-align: center;
+            color: #f43f5e;
+        }
+        .cinema-item {
+            padding-left: 1.5rem !important;
+        }
+
+        /* ===== Tabs ngày ===== */
+        .date-tab {
+            min-width: 76px;
+            text-align: center;
+            border-radius: 10px !important;
+            padding: 8px 6px;
+            border-width: 1px;
+            line-height: 1.25;
+        }
+        .date-tab .fw-semibold {
+            font-size: 0.95rem;
+        }
+        .date-tab small {
+            display: block;
+            font-size: 0.75rem;
+            opacity: 0.85;
+        }
+        .date-tab.btn-accent {
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            border-color: #f43f5e;
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(244,63,94,0.4);
+            font-weight: 700;
+        }
+        .date-tab.btn-outline-light {
+            color: #374151;
+            border-color: #d1d5db;
+            background-color: #fff;
+        }
+        .date-tab.btn-outline-light:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        /* ===== Thông tin rạp đang chọn ===== */
+        .cinema-info {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+        .cinema-info h5 {
+            font-weight: 700;
+            color: #111827;
+        }
+        .cinema-info p {
+            color: #6b7280 !important;
+        }
+
+        /* ===== Thẻ phim + suất chiếu ===== */
+        .schedule-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .schedule-card img {
+            width: 60px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        .schedule-card .card-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: #111827;
+        }
+        .schedule-card .movie-meta {
+            color: #6b7280 !important;
+            font-size: 0.85rem;
+        }
+        .schedule-card .movie-meta .badge {
+            font-weight: 600;
+        }
+        .screen-group-label {
+            color: #6b7280;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            margin: 10px 0 6px 0;
+        }
+
+        /* Nút giờ chiếu - tương phản rõ trên nền trắng */
+        .showtime-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            color: #111827;
+            text-decoration: none;
+            background-color: #fff;
+            transition: all .15s ease;
+        }
+        .showtime-btn:hover {
+            background-color: #f43f5e;
+            border-color: #f43f5e;
+            color: #fff;
+        }
+        .showtime-btn small {
+            font-size: 0.72rem;
+            color: inherit;
+            opacity: 0.85;
+        }
+
+        /* ===== Trạng thái rỗng ===== */
+        .alert-dark {
+            background-color: #f9fafb;
+            border: 1px dashed #d1d5db;
+            color: #6b7280;
+        }
+
+        /* Tiêu đề trang - đồng bộ chữ đen như ảnh mẫu, giữ gạch đỏ nhấn */
+        .page-title {
+            color: #111827;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{layout/header :: navbar}"></div>
+
+<main class="container-fluid my-4 px-3 px-md-5">
+
+    <h2 class="h3 fw-bold page-title mb-4 border-start border-4 border-danger ps-3">
+        <i class="fa-solid fa-calendar-days me-2"></i>Lịch Chiếu Phim
+    </h2>
+
+    <div class="row g-3">
+
+        <!-- ===== Cột 1: Khu vực ===== -->
+        <div class="col-6 col-md-2">
+            <div class="schedule-col p-2">
+                <h6 class="text-uppercase small px-2 pt-2 mb-1">Khu vực</h6>
+                <div class="list-group list-group-flush">
+                    <a th:each="opt : ${cityOptions}"
+                       th:href="@{/showtime(city=${opt.city()})}"
+                       class="list-group-item list-group-item-action border-0 py-2 d-flex justify-content-between align-items-center"
+                       th:classappend="${opt.city() == selectedCity} ? 'active-item' : ''">
+                        <span th:text="${opt.city()}">Hà Nội</span>
+                        <span class="city-badge" th:text="${opt.cinemaCount()}">56</span>
+                    </a>
+                </div>
+                <p th:if="${#lists.isEmpty(cityOptions)}" class="text-muted small p-2 mb-0">Chưa có dữ liệu khu vực.</p>
+            </div>
+        </div>
+
+        <!-- ===== Cột 2: Rạp chiếu (gom theo hệ thống rạp) ===== -->
+        <div class="col-6 col-md-3">
+            <div class="schedule-col p-2">
+                <h6 class="text-uppercase small px-2 pt-2 mb-1">Rạp chiếu</h6>
+                <div th:each="chainEntry : ${cinemasByChain}">
+                    <div class="chain-header">
+                        <img th:if="${chainEntry.key.logoUrl != null}" th:src="${chainEntry.key.logoUrl}" alt="logo">
+                        <i th:if="${chainEntry.key.logoUrl == null}" class="fa-solid fa-clapperboard fallback-icon"></i>
+                        <span th:text="${chainEntry.key.name}">Beta Cinemas</span>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a th:each="cinema : ${chainEntry.value}"
+                           th:href="@{/showtime(city=${selectedCity}, cinemaId=${cinema.id}, date=${selectedDate})}"
+                           class="list-group-item list-group-item-action border-0 py-2 cinema-item"
+                           th:classappend="${selectedCinema != null and cinema.id == selectedCinema.id} ? 'active-item' : ''"
+                           th:text="${cinema.name}">Beta Giải Phóng</a>
+                    </div>
+                </div>
+                <p th:if="${#maps.isEmpty(cinemasByChain)}" class="text-muted small p-2 mb-0">Khu vực này chưa có rạp.</p>
+            </div>
+        </div>
+
+        <!-- ===== Cột 3: Ngày + Lịch chiếu ===== -->
+        <div class="col-12 col-md-7">
+
+            <!-- Tabs ngày (7 ngày kể từ hôm nay) -->
+            <div class="d-flex gap-2 overflow-auto pb-2 mb-3">
+                <a th:each="tab : ${dateList}"
+                   th:href="@{/showtime(city=${selectedCity}, cinemaId=${selectedCinema != null ? selectedCinema.id : null}, date=${tab.date()})}"
+                   class="btn date-tab flex-shrink-0"
+                   th:classappend="${tab.date() == selectedDate} ? 'btn-accent' : 'btn-outline-light'">
+                    <div class="fw-semibold" th:text="${#temporals.format(tab.date(), 'dd/MM')}">01/07</div>
+                    <small th:text="${tab.dayLabel()}">Thứ 4</small>
+                </a>
+            </div>
+
+            <!-- Thông tin rạp đang chọn -->
+            <div th:if="${selectedCinema != null}" class="cinema-info mb-3">
+                <h5 class="mb-1" th:text="${selectedCinema.name}">Beta Giải Phóng</h5>
+                <p class="small mb-0">
+                    <i class="fa-solid fa-location-dot me-1"></i>
+                    <span th:text="${selectedCinema.address}">Địa chỉ rạp</span>
+                </p>
+            </div>
+
+            <div th:if="${selectedCinema == null}" class="alert alert-dark text-center py-4">
+                Vui lòng chọn khu vực và rạp chiếu để xem lịch chiếu.
+            </div>
+
+            <!-- Danh sách phim + suất chiếu trong ngày, gom theo loại phòng -->
+            <div th:each="ms : ${schedule}" class="card schedule-card mb-3">
+
+                <div class="card-body d-flex gap-3">
+
+
+                    <!-- ảnh phim -->
+                    <img th:src="${ms.movie().posterUrl != null
+        ? ms.movie().posterUrl
+        : '/images/no-poster.png'}"
+                         alt="Poster phim">
+
+
+
+                    <div class="flex-grow-1">
+
+
+                        <!-- tên phim -->
+                        <h5 class="card-title mb-1"
+                            th:text="${ms.movie().title}">
+                            Tên phim
+                        </h5>
+
+
+                        <!-- thông tin phim -->
+                        <p class="movie-meta mb-2">
+
+                <span th:text="${ms.movie().genre}">
+                    Thể loại
+                </span>
+
+                            <span> · </span>
+
+                            <span th:text="${ms.durationLabel()}">
+                    1h30
+                </span>
+
+
+                            <span th:if="${ms.movie().ageRating != null}">
+                    ·
+                </span>
+
+
+                            <span class="badge bg-secondary"
+                                  th:if="${ms.movie().ageRating != null}"
+                                  th:text="${ms.movie().ageRating}">
+                    T13
+                </span>
+
+                        </p>
+
+
+                        <!-- giờ chiếu -->
+                        <div th:each="group : ${ms.screenGroups()}">
+
+                            <div class="screen-group-label"
+                                 th:text="${group.screenTypeLabel()}">
+                                Phòng 2D
+                            </div>
+
+
+                            <div class="d-flex flex-wrap gap-2">
+
+
+                                <a th:each="slot : ${group.slots()}"
+                                   th:href="@{/booking/{id}(id=${slot.showtimeId()})}"
+                                   class="showtime-btn">
+
+                        <span th:text="${slot.time()}">
+                            18:00
+                        </span>
+
+                                    <small th:text="${slot.priceLabel()}">
+                                        55K
+                                    </small>
+
+                                </a>
+
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div th:if="${selectedCinema != null and #lists.isEmpty(schedule)}"
+                 class="alert alert-dark text-center py-4">
+                Rạp này chưa có suất chiếu nào trong ngày đã chọn.
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+</body>
+</html>

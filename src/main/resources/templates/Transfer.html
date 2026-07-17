@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{layout/header :: header-head}"></th:block>
+    <title>Chuyển Khoản Thanh Toán - CinemaX</title>
+    <style>
+        html body { background-color: #ffffff !important; }
+        .transfer-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding: 24px;
+            max-width: 640px;
+            margin: 40px auto;
+        }
+        .transfer-card h4 { color: #111827; font-weight: 700; }
+        .method-badge {
+            display: inline-block;
+            background-color: #fee2e2;
+            color: #f43f5e;
+            font-weight: 600;
+            font-size: .8rem;
+            border-radius: 999px;
+            padding: 3px 12px;
+            margin-bottom: 10px;
+        }
+        .qr-box {
+            text-align: center;
+            background-color: #f9fafb;
+            border: 1px dashed #d1d5db;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .qr-box img { width: 220px; height: 220px; border-radius: 8px; background: #fff; }
+        .info-table td { padding: 6px 4px; vertical-align: top; }
+        .info-table td:first-child { color: #6b7280; width: 150px; }
+        .info-table td:last-child { font-weight: 600; color: #111827; }
+        .copy-btn {
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: .75rem;
+            color: #6b7280;
+            margin-left: 6px;
+        }
+        .copy-btn:hover { border-color: #f43f5e; color: #f43f5e; }
+        .total-line { font-size: 1.3rem; font-weight: 700; color: #f43f5e; }
+    </style>
+</head>
+<body>
+<div th:replace="~{layout/header :: navbar}"></div>
+
+<main class="container">
+    <div class="transfer-card">
+        <span class="method-badge" th:switch="${method.name()}">
+            <span th:case="'CARD'"><i class="fa-regular fa-credit-card me-1"></i>Thẻ ngân hàng</span>
+            <span th:case="'MOMO'"><i class="fa-solid fa-wallet me-1"></i>Ví MoMo</span>
+            <span th:case="'VNPAY'"><i class="fa-solid fa-qrcode me-1"></i>VNPay</span>
+            <span th:case="*" th:text="${method}">-</span>
+        </span>
+
+        <h4 class="mb-3"><i class="fa-solid fa-qrcode me-2"></i>Quét mã để chuyển khoản</h4>
+
+        <div class="row g-4">
+            <div class="col-12 col-sm-5">
+                <div class="qr-box">
+                    <img th:src="@{/image/qr-sepay.png}" alt="QR chuyển khoản">
+                    <p class="text-muted small mt-2 mb-0">Mở app ngân hàng bất kỳ và quét mã này</p>
+                </div>
+            </div>
+            <div class="col-12 col-sm-7">
+                <table class="info-table">
+                    <tr>
+                        <td>Ngân hàng</td>
+                        <td th:text="${bankName}">MB Bank</td>
+                    </tr>
+                    <tr>
+                        <td>Số tài khoản</td>
+                        <td>
+                            <span id="accNo" th:text="${accountNo}">0123456789</span>
+                            <button type="button" class="copy-btn" onclick="copyText('accNo')">Sao chép</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Chủ tài khoản</td>
+                        <td th:text="${accountName}">CINEMAX DEMO</td>
+                    </tr>
+                    <tr>
+                        <td>Số tiền</td>
+                        <td class="total-line" th:text="${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">45,000 đ</td>
+                    </tr>
+                    <tr>
+                        <td>Nội dung CK</td>
+                        <td>
+                            <span id="transferContent" th:text="${transferContent}">BK...</span>
+                            <button type="button" class="copy-btn" onclick="copyText('transferContent')">Sao chép</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="alert alert-warning small mt-3">
+            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+            Vui lòng chuyển đúng <strong>số tiền</strong> và <strong>nội dung chuyển khoản</strong> để đối chiếu.
+            Ghế đang được giữ đến
+            <strong th:text="${#temporals.format(booking.expiresAt, 'HH:mm dd/MM/yyyy')}">-</strong>.
+        </div>
+
+        <form th:action="@{'/booking/payment/' + ${booking.id} + '/confirm-transfer'}" method="post">
+            <input type="hidden" name="method" th:value="${method}">
+            <button type="submit" class="btn w-100 py-2" style="background-color:#f43f5e; color:#fff; font-weight:600; border-radius:8px;">
+                <i class="fa-solid fa-check-double me-2"></i>Tôi đã chuyển khoản - Xác nhận thanh toán
+            </button>
+        </form>
+
+
+    </div>
+</main>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+
+<script>
+    function copyText(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text);
+    }
+</script>
+</body>
+</html>
