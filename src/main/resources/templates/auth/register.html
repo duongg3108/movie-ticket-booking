@@ -9,33 +9,33 @@
 <div class="container my-5 py-3">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card bg-dark text-white border-secondary shadow-lg rounded-4 p-4">
+            <div class="card bg-light text-dark border-0 shadow rounded-4 p-4">
                 <div class="card-body">
                     <h3 class="card-title text-center fw-bold mb-4">Tạo Tài Khoản</h3>
                     <form th:action="@{/register}" th:object="${userDto}" method="post">
                         <div class="mb-3">
                             <label for="fullName" class="form-label">Họ và Tên</label>
-                            <input type="text" th:field="*{fullName}" class="form-control bg-secondary text-white border-0" id="fullName">
+                            <input type="text" th:field="*{fullName}" class="form-control" id="fullName">
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" th:field="*{email}" class="form-control bg-secondary text-white border-0" id="email">
+                            <input type="email" th:field="*{email}" class="form-control" id="email">
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                         </div>
                         <div class="mb-3">
                             <label for="phone" class="form-label">Số điện thoại</label>
-                            <input type="text" th:field="*{phone}" class="form-control bg-secondary text-white border-0" id="phone">
+                            <input type="text" th:field="*{phone}" class="form-control" id="phone">
                         </div>
                         <div class="mb-4">
                             <label for="password" class="form-label">Mật khẩu</label>
-                            <input type="password" th:field="*{password}" class="form-control bg-secondary text-white border-0" id="password">
+                            <input type="password" th:field="*{password}" class="form-control" id="password">
                             <div class="text-danger small mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                         </div>
                         <button type="submit" class="btn btn-accent w-100 py-2">Đăng Ký</button>
                     </form>
                     <div class="text-center mt-3">
-                        <small class="text-muted">Đã có tài khoản? <a href="/login" class="text-danger">Đăng nhập</a></small>
+                        <small class="text-muted">Đã có tài khoản? <a href="/login" class="text-danger text-decoration-none fw-semibold">Đăng nhập</a></small>
                     </div>
                 </div>
             </div>

@@ -19,6 +19,11 @@ public class CinemaServiceImpl implements CinemaService {
     private final CinemaRepository cinemaRepository;
 
     @Override
+    public List<Cinema> findAll() {
+        return cinemaRepository.findAll();
+    }
+
+    @Override
     public List<CityOption> findCityOptions() {
         return cinemaRepository.findCityOptions();
     }
@@ -26,6 +31,11 @@ public class CinemaServiceImpl implements CinemaService {
     @Override
     public List<Cinema> findByCity(String city) {
         return cinemaRepository.findByCity(city);
+    }
+
+    @Override
+    public List<Cinema> findByChainId(Long chainId) {
+        return cinemaRepository.findByChainId(chainId);
     }
 
     @Override

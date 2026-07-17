@@ -9,16 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-light: #ffffff;
-            --bg-card: #f9fafb;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
             --accent: #f43f5e;
             --accent-hover: #e11d48;
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --border-color: #e5e7eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
         body {
-            background-color: var(--bg-light);
+            background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: 'Outfit', sans-serif;
             min-height: 100vh;
@@ -26,10 +25,9 @@
             flex-direction: column;
         }
         .navbar-custom {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .navbar-brand {
             font-weight: 700;
@@ -59,46 +57,19 @@
             box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
             color: #fff;
         }
-        /* Nút Đăng nhập - viền tối màu trên nền sáng thay vì outline-light (vốn dành cho nền tối) */
-        .navbar-custom .btn-outline-light {
-            color: var(--text-main);
-            border-color: var(--border-color);
-            background-color: transparent;
-        }
-        .navbar-custom .btn-outline-light:hover {
-            background-color: #f3f4f6;
-            color: var(--text-main);
-            border-color: var(--border-color);
-        }
-        /* Dropdown user menu - đồng bộ theme sáng */
-        .navbar-custom .dropdown-menu {
-            background-color: #ffffff;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        }
-        .navbar-custom .dropdown-item {
-            color: var(--text-main);
-        }
-        .navbar-custom .dropdown-item:hover {
-            background-color: #f3f4f6;
-            color: var(--text-main);
-        }
-        .navbar-custom .dropdown-divider {
-            border-top: 1px solid var(--border-color);
-        }
     </style>
 </head>
 <body>
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="/home"><i class="fa-solid fa-film me-2"></i>CinemaX</a>
+        <a class="navbar-brand" href="/"><i class="fa-solid fa-film me-2"></i>CinemaX</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/home">Trang chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="/showtime">Lịch chiếu & Phim</a></li>
+                <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link" href="/movies">Lịch chiếu & Phim</a></li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link text-warning" href="/admin/movies"><i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)</a>
                 </li>
@@ -115,7 +86,7 @@
                     <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="fa-solid fa-user me-1"></i><span sec:authentication="name">User</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
                         <li><a class="dropdown-item" href="/booking/history">Lịch sử đặt vé</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>

@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,41 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
 
     private final ShowtimeRepository showtimeRepository;
+
+    @Override
+    public List<Showtime> findAll() {
+        return showtimeRepository.findAll();
+    }
+
+    @Override
+    public Optional<Showtime> findById(Long id) {
+        return showtimeRepository.findById(id);
+    }
+
+    @Override
+    public List<Showtime> findByMovieId(Long movieId) {
+        return showtimeRepository.findByMovieId(movieId);
+    }
+
+    @Override
+    public List<Showtime> findByCinemaId(Long cinemaId) {
+        return showtimeRepository.findByRoomCinemaId(cinemaId);
+    }
+
+    @Override
+    public List<Showtime> findByMovieIdAndStartTimeBetween(Long movieId, LocalDateTime start, LocalDateTime end) {
+        return showtimeRepository.findByMovieIdAndStartTimeBetween(movieId, start, end);
+    }
+
+    @Override
+    public Showtime save(Showtime showtime) {
+        return showtimeRepository.save(showtime);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        showtimeRepository.deleteById(id);
+    }
 
     @Override
     public List<MovieSchedule> getScheduleByCinemaAndDate(Long cinemaId, LocalDate date) {
@@ -72,6 +108,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
         return result;
     }
+
     @Override
     public List<Showtime> findUpcomingByMovie(Long movieId) {
         return showtimeRepository.findByMovie_IdAndStartTimeAfterAndStatusNotOrderByStartTimeAsc(
