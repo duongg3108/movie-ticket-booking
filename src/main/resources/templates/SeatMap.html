@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{layout/header :: header-head}"></th:block>
+    <title>Chọn Ghế - CinemaX</title>
+    <style>
+        html body { background-color: #ffffff !important; }
+
+        .step-bar {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .step-bar .step {
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .step-bar .step.active {
+            color: #f43f5e;
+        }
+        .step-bar .step i {
+            display: block;
+            margin: 0 auto 4px;
+            font-size: 1.1rem;
+        }
+
+        .seatmap-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+            color: #374151;
+        }
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            flex-shrink: 0;
+        }
+        .legend-box.selected { background: #22c55e; border-color: #22c55e; }
+        .legend-box.unavailable {
+            background: repeating-linear-gradient(45deg, #e5e7eb, #e5e7eb 3px, #f3f4f6 3px, #f3f4f6 6px);
+        }
+        .legend-box.sold {
+            background: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 3px, #f1f5f9 3px, #f1f5f9 6px);
+        }
+        .legend-box.available { background: #f3f4f6; }
+        .legend-box.vip { background: #fef3c7; border-color: #f59e0b; }
+        .legend-box.couple { background: #fce7f3; border-color: #ec4899; }
+
+        .screen-bar {
+            background: linear-gradient(180deg, #e5e7eb, #f9fafb);
+            border-radius: 6px 6px 60px 60px / 6px 6px 20px 20px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: .1em;
+            color: #6b7280;
+            padding: 10px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+        }
+
+        .seat-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .row-label {
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #374151;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--cols), 28px);
+            gap: 6px;
+            flex: 1;
+        }
+        .seat-cell {
+            width: 28px;
+            height: 28px;
+            border-radius: 5px;
+            border: 1px solid #d1d5db;
+            background-color: #f3f4f6;
+            cursor: pointer;
+            transition: all .15s ease;
+            padding: 0;
+        }
+        .seat-cell.empty {
+            visibility: hidden;
+            cursor: default;
+        }
+        .seat-cell.vip { background-color: #fef3c7; border-color: #f59e0b; }
+        .seat-cell.couple { background-color: #fce7f3; border-color: #ec4899; }
+        .seat-cell.unavailable {
+            background: repeating-linear-gradient(45deg, #e5e7eb, #e5e7eb 3px, #f3f4f6 3px, #f3f4f6 6px);
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+        .seat-cell.sold {
+            background: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 3px, #f1f5f9 3px, #f1f5f9 6px);
+            cursor: not-allowed;
+            border-color: #cbd5e1;
+        }
+        .seat-cell.selected {
+            background-color: #22c55e !important;
+            border-color: #16a34a !important;
+        }
+        .seat-cell:not(.empty):not(.unavailable):not(.sold):hover {
+            border-color: #f43f5e;
+            transform: translateY(-1px);
+        }
+
+        .booking-summary {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding: 18px;
+        }
+        .booking-summary h5 { color: #111827; font-weight: 700; }
+        .booking-summary .movie-title { color: #f43f5e; font-weight: 700; }
+        .booking-summary .info-line { color: #374151; font-size: 0.92rem; margin-bottom: 4px; }
+        .booking-summary .selected-seats { color: #111827; font-weight: 600; }
+
+        .total-box {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding: 18px;
+            margin-top: 16px;
+        }
+        .total-box .label { color: #9ca3af; font-size: 0.78rem; letter-spacing: .05em; }
+        .total-box .amount { color: #111827; font-weight: 700; font-size: 1.4rem; }
+
+        .btn-continue {
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 10px 0;
+            width: 100%;
+        }
+        .btn-continue:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{layout/header :: navbar}"></div>
+
+<!-- Thanh buoc -->
+<div class="step-bar py-3 mb-4">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col step active">
+                <i class="fa-solid fa-couch"></i>Chọn ghế
+            </div>
+            <div class="col step">
+                <i class="fa-solid fa-credit-card"></i>Thanh toán
+            </div>
+            <div class="col step">
+                <i class="fa-solid fa-ticket"></i>Thông tin vé
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="container mb-5">
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="row g-4">
+
+        <!-- ===== Cột trái: Seat map ===== -->
+        <div class="col-12 col-lg-8">
+            <div class="seatmap-card">
+
+                <div class="d-flex flex-wrap gap-4 mb-4">
+                    <div class="legend-item"><span class="legend-box selected"></span>Ghế bạn chọn</div>
+                    <div class="legend-item"><span class="legend-box available"></span>Ghế thường</div>
+                    <div class="legend-item"><span class="legend-box vip"></span>Ghế VIP</div>
+                    <div class="legend-item"><span class="legend-box couple"></span>Ghế đôi</div>
+                    <div class="legend-item"><span class="legend-box unavailable"></span>Không thể chọn</div>
+                    <div class="legend-item"><span class="legend-box sold"></span>Đã bán</div>
+                </div>
+
+                <div class="screen-bar">MÀN HÌNH</div>
+
+                <div id="seatContainer" th:style="'--cols: ' + ${seatMap.totalColumns()}">
+                    <div th:each="row : ${seatMap.rows()}" class="seat-row">
+                        <div class="row-label" th:text="${row.rowLabel()}">A</div>
+                        <div class="seat-grid">
+                            <button th:each="cell : ${row.cells()}"
+                                    type="button"
+                                    class="seat-cell"
+                                    th:classappend="${
+                                        cell.status().name() == 'EMPTY' ? 'empty' :
+                                        (cell.status().name() == 'UNAVAILABLE' ? 'unavailable' :
+                                        (cell.status().name() == 'SOLD' ? 'sold' :
+                                        (cell.seatType() != null and cell.seatType().name() == 'VIP' ? 'vip' :
+                                        (cell.seatType() != null and cell.seatType().name() == 'COUPLE' ? 'couple' : ''))))}"
+                                    th:attr="data-seat-id=${cell.seatId()}, data-seat-code=${cell.seatCode()}"
+                                    th:disabled="${cell.status().name() == 'EMPTY' or cell.status().name() == 'UNAVAILABLE' or cell.status().name() == 'SOLD'}"
+                                    th:title="${cell.seatCode()}">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <p th:if="${#lists.isEmpty(seatMap.rows())}" class="text-muted text-center py-4 mb-0">
+                    Phòng chiếu này chưa có sơ đồ ghế.
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== Cột phải: Thông tin suất chiếu + tổng đơn ===== -->
+        <div class="col-12 col-lg-4">
+            <div class="booking-summary">
+                <p class="movie-title mb-1" th:text="${seatMap.movieTitle()}">Tên phim</p>
+                <h5 class="mb-1" th:text="${seatMap.cinemaName()}">Tên rạp</h5>
+                <p class="info-line mb-2">
+                    <i class="fa-solid fa-location-dot me-1"></i>
+                    <span th:text="${seatMap.cinemaAddress()}">Địa chỉ</span>
+                </p>
+                <p class="info-line">
+                    Suất <strong th:text="${seatMap.showTimeLabel()}">20:45</strong>
+                    ngày <strong th:text="${seatMap.showDateLabel()}">02/07/2026</strong>
+                </p>
+                <p class="info-line mb-3">
+                    <span th:text="${seatMap.screenTypeLabel()}">Phòng chiếu 2D</span> -
+                    <span th:text="${seatMap.roomName()}">Phòng 03</span>
+                </p>
+                <hr>
+                <p class="info-line mb-1">Ghế đã chọn:</p>
+                <p class="selected-seats mb-0" id="selectedSeatsLabel">Chưa chọn ghế</p>
+            </div>
+
+            <div class="total-box">
+                <div class="label text-uppercase mb-1">Tổng đơn hàng</div>
+                <div class="amount"><span id="totalAmount">0</span> đ</div>
+            </div>
+
+            <form th:action="@{'/booking/' + ${seatMap.showtimeId()} + '/hold'}" method="post" id="holdForm" class="mt-3">
+                <input type="hidden" name="seatIds" id="seatIdsInput">
+                <button type="submit" class="btn-continue" id="continueBtn" disabled>Tiếp tục</button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+
+<script th:inline="javascript">
+    const seatPrice = /*[[${seatMap.seatPrice()}]]*/ 0;
+    const selected = new Set();
+
+    document.querySelectorAll('.seat-cell:not(.empty):not(.unavailable):not(.sold)').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const seatId = btn.dataset.seatId;
+            if (selected.has(seatId)) {
+                selected.delete(seatId);
+                btn.classList.remove('selected');
+            } else {
+                selected.add(seatId);
+                btn.classList.add('selected');
+            }
+            updateSummary();
+        });
+    });
+
+    function updateSummary() {
+        const count = selected.size;
+        const total = count * seatPrice;
+        document.getElementById('totalAmount').textContent = total.toLocaleString('vi-VN');
+        document.getElementById('seatIdsInput').value = Array.from(selected).join(',');
+        document.getElementById('continueBtn').disabled = count === 0;
+
+        const codes = Array.from(document.querySelectorAll('.seat-cell.selected'))
+            .map(el => el.dataset.seatCode);
+        document.getElementById('selectedSeatsLabel').textContent =
+            codes.length > 0 ? codes.join(', ') : 'Chưa chọn ghế';
+    }
+</script>
+</body>
+</html>

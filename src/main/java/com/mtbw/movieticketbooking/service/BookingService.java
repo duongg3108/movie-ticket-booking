@@ -1,56 +1,34 @@
 package com.mtbw.movieticketbooking.service;
 
+import com.mtbw.movieticketbooking.dto.SeatMapPageDto;
 import com.mtbw.movieticketbooking.entity.Booking;
-import com.mtbw.movieticketbooking.enums.BookingStatus;
-import com.mtbw.movieticketbooking.repository.BookingRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.mtbw.movieticketbooking.entity.BookingSeat;
+import com.mtbw.movieticketbooking.entity.Payment;
+import com.mtbw.movieticketbooking.enums.PaymentMethod;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@Service
-public class BookingService {
+public interface BookingService {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    // ===== Các hàm của teammate =====
+    List<Booking> getBookingHistory(Long userId);
 
-    //Lấy danh sách lịch sử đặt vé của 1 user
-    public List<Booking> getBookingHistory(Long userId) {
-        // Gọi đúng tên hàm mới
-        return bookingRepository.findByUserIdOrderByCreatedAtDesc(userId);
-    }
+    boolean cancelBooking(Long bookingId);
 
-    // Xử lý hủy vé PENDING
-    public boolean cancelBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElse(null);
+    void updatePaymentSuccess(Long bookingId);
 
-        if (booking != null && BookingStatus.PENDING.equals(booking.getStatus())) {
-            LocalDateTime startTime = booking.getShowtime().getStartTime();
+    Booking getBookingById(Long id);
 
-            // Hủy trước 1 tiếng
-            if (LocalDateTime.now().isBefore(startTime.minusHours(1))) {
-                booking.setStatus(BookingStatus.CANCELLED);
-                bookingRepository.save(booking);
-                return true;
-            }
-        }
-        return false;
-    }
+    // ===== Các hàm của bạn =====
+    SeatMapPageDto buildSeatMap(Long showtimeId);
 
-    // Xử lý thanh toán thành công
-    public void updatePaymentSuccess(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElse(null);
+    Booking holdSeats(Long showtimeId, List<Long> seatIds, Long userId);
 
-        if (booking != null && BookingStatus.PENDING.equals(booking.getStatus())) {
-            booking.setStatus(BookingStatus.PAID);
-            // Cập nhật thêm giờ thanh toán
-            booking.setPaidAt(LocalDateTime.now());
-            bookingRepository.save(booking);
-        }
-    }
+    Booking getBooking(Long bookingId);
 
-    public Booking getBookingById(Long id) {
-        return bookingRepository.findById(id).orElse(null);
-    }
+    List<BookingSeat> getBookingSeats(Long bookingId);
+
+    Booking payBooking(Long bookingId, PaymentMethod method);
+
+    Payment getPayment(Long bookingId);
 }
