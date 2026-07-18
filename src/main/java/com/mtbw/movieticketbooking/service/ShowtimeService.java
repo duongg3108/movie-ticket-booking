@@ -23,4 +23,6 @@ public interface ShowtimeService {
      */
     List<MovieSchedule> getScheduleByCinemaAndDate(Long cinemaId, LocalDate date);
     List<Showtime> findUpcomingByMovie(Long movieId);
+    // Hàm lấy danh sách các suất chiếu diễn ra trong ngày hôm nay
+    List<Showtime> getTodayShowtimes();
 }

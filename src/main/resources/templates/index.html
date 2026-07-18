@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head th:replace="~{layout/header :: header-head}">
     <title>CinemaX - Movie Ticket Booking</title>
 </head>
@@ -7,18 +7,20 @@
 <div th:replace="~{layout/header :: navbar}"></div>
 
 <main class="container my-5">
-    <div class="p-5 mb-5 rounded-4" style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+    <!-- Hero Section -->
+    <div class="p-5 mb-5 rounded-4" style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
         <h1 class="display-4 fw-bold text-dark mb-3">Đặt Vé Xem Phim Trực Tuyến</h1>
         <p class="lead mb-4" style="color: #475569;">Trải nghiệm điện ảnh đỉnh cao với hệ thống đặt vé nhanh chóng, tiện lợi và chọn ghế ngồi thông minh.</p>
         <a href="#now-showing" class="btn btn-accent btn-lg"><i class="fa-solid fa-ticket me-2"></i>Đặt Vé Ngay</a>
     </div>
 
+    <!-- Now Showing Section -->
     <section id="now-showing" class="mb-5">
         <h2 class="h3 fw-bold text-dark mb-4 border-start border-4 border-danger ps-3">Phim Đang Chiếu</h2>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${not #lists.isEmpty(nowShowingMovies)}">
             <div class="col" th:each="movie : ${nowShowingMovies}">
-                <div class="card h-100 bg-light text-dark border-0 shadow-sm card-hover" style="border-radius: 12px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
-                    <img th:src="${movie.posterUrl != null ? movie.posterUrl : 'https://picsum.photos/seed/noposter/300/450'}" class="card-img-top" style="height: 360px; object-fit: cover;" alt="Movie Poster">
+                <div class="card h-100 bg-white text-dark border-light shadow-sm card-hover" style="border-radius: 12px; overflow: hidden; transition: transform 0.3s;">
+                    <img th:src="${movie.posterUrl != null ? movie.posterUrl : 'https://via.placeholder.com/300x450?text=Movie+Poster'}" class="card-img-top" style="height: 360px; object-fit: cover;" alt="Movie Poster">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title fw-bold text-truncate" th:text="${movie.title}">Tên Phim</h5>
                         <p class="card-text text-muted small mb-2" th:text="${movie.genre}">Thể loại</p>
@@ -35,12 +37,13 @@
         </div>
     </section>
 
+    <!-- Coming Soon Section -->
     <section id="coming-soon">
         <h2 class="h3 fw-bold text-dark mb-4 border-start border-4 border-warning ps-3">Phim Sắp Chiếu</h2>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${not #lists.isEmpty(comingSoonMovies)}">
             <div class="col" th:each="movie : ${comingSoonMovies}">
-                <div class="card h-100 bg-light text-dark border-0 shadow-sm card-hover" style="border-radius: 12px; overflow: hidden; opacity: 0.85; transition: transform 0.3s, box-shadow 0.3s;">
-                    <img th:src="${movie.posterUrl != null ? movie.posterUrl : 'https://picsum.photos/seed/noposter/300/450'}" class="card-img-top" style="height: 360px; object-fit: cover;" alt="Movie Poster">
+                <div class="card h-100 bg-white text-dark border-light shadow-sm" style="border-radius: 12px; overflow: hidden; opacity: 0.85;">
+                    <img th:src="${movie.posterUrl != null ? movie.posterUrl : 'https://via.placeholder.com/300x450?text=Movie+Poster'}" class="card-img-top" style="height: 360px; object-fit: cover;" alt="Movie Poster">
                     <div class="card-body">
                         <h5 class="card-title fw-bold text-truncate" th:text="${movie.title}">Tên Phim</h5>
                         <p class="card-text text-muted small" th:text="${movie.genre}">Thể loại</p>

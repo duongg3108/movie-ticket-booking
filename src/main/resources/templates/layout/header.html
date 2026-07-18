@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
 <head th:fragment="header-head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #ffffff;
-            --bg-card: #f8f9fa;
+            --bg-dark: #f8f9fa;
+            --bg-card: #ffffff;
             --accent: #f43f5e;
             --accent-hover: #e11d48;
-            --text-main: #1a1a2e;
-            --text-muted: #6c757d;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
             --border-color: rgba(0,0,0,0.1);
         }
         body {
@@ -37,7 +37,7 @@
             color: var(--accent) !important;
         }
         .nav-link {
-            color: var(--text-main) !important;
+            color: #334155 !important;
             font-weight: 500;
             transition: color 0.2s;
         }
@@ -62,11 +62,11 @@
     </style>
 </head>
 <body>
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-custom sticky-top">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
     <div class="container">
         <a class="navbar-brand" href="/"><i class="fa-solid fa-film me-2"></i>CinemaX</a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <i class="fa-solid fa-bars" style="color: var(--text-main);"></i>
+            <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
@@ -75,8 +75,15 @@
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" href="/admin/movies" style="color: #f59e0b !important;"><i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)</a>
                 </li>
+                <!-- Staff Menu Items -->
                 <li class="nav-item" sec:authorize="hasRole('STAFF')">
-                    <a class="nav-link" href="/staff/tickets" style="color: #0ea5e9 !important;"><i class="fa-solid fa-qrcode me-1"></i>Soát vé (Staff)</a>
+                    <a class="nav-link text-info" href="/staff/tickets"><i class="fa-solid fa-qrcode me-1"></i>Soát vé</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('STAFF')">
+                    <a class="nav-link text-info" href="/staff/dashboard"><i class="fa-solid fa-calendar-days me-1"></i>Suất chiếu</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('STAFF')">
+                    <a class="nav-link text-info" href="/staff/bookings"><i class="fa-solid fa-check-double me-1"></i>Duyệt Booking</a>
                 </li>
             </ul>
             <div class="d-flex align-items-center gap-3">

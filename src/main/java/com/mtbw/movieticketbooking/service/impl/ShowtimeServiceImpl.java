@@ -5,9 +5,9 @@ import com.mtbw.movieticketbooking.dto.ScreenGroup;
 import com.mtbw.movieticketbooking.dto.ShowtimeSlot;
 import com.mtbw.movieticketbooking.entity.Movie;
 import com.mtbw.movieticketbooking.entity.Showtime;
+import com.mtbw.movieticketbooking.enums.MovieStatus;
 import com.mtbw.movieticketbooking.enums.ScreenType;
 import com.mtbw.movieticketbooking.enums.ShowtimeStatus;
-import com.mtbw.movieticketbooking.enums.MovieStatus;
 import com.mtbw.movieticketbooking.repository.MovieRepository;
 import com.mtbw.movieticketbooking.repository.ShowtimeRepository;
 import com.mtbw.movieticketbooking.service.ShowtimeService;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -64,6 +65,16 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     @Override
     public void deleteById(Long id) {
         showtimeRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Showtime> getTodayShowtimes() {
+        // Thiết lập mốc thời gian bắt đầu ngày hôm nay (00:00:00)
+        LocalDateTime startOfToday = LocalDateTime.now().with(LocalTime.MIN);
+        // Thiết lập mốc thời gian kết thúc ngày hôm nay (23:59:59)
+        LocalDateTime endOfToday = LocalDateTime.now().with(LocalTime.MAX);
+        // Gọi Repo thực hiện truy vấn và trả về kết quả
+        return showtimeRepository.findByStartTimeBetweenOrderByStartTimeAsc(startOfToday, endOfToday);
     }
 
     @Override
@@ -143,8 +154,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         return h > 0 ? String.format("%dh%02d'", h, m) : String.format("%d'", m);
     }
 
-    // Nhan hien thi cho tung loai phong - dich tu enum THAT trong DB (rooms.screen_type),
-    // khong bia them dinh dang khong ton tai trong schema.
+    // Nhãn hiển thị cho từng loại phòng - dịch từ enum THẬT trong DB (rooms.screen_type)
     private String screenTypeLabel(ScreenType type) {
         return switch (type) {
             case STANDARD -> "Phòng chiếu 2D";
