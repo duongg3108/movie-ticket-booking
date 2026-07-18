@@ -241,6 +241,45 @@ public class BookingServiceImpl implements BookingService {
         return paymentRepository.findByBookingId(bookingId).orElse(null);
     }
 
+    @Override
+    public List<Booking> getBookingsByUser(Long userId) {
+        return bookingRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Override
+    @Transactional
+    public Booking cancelBooking(Long bookingId, Long userId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Khong tim thay don dat ve"));
+
+        // Kiem tra booking thuoc ve user hien tai
+        if (!booking.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("Ban khong co quyen huy don dat ve nay");
+        }
+
+        // Chi cho phep huy khi dang PENDING
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Chi co the huy don dat ve dang cho thanh toan (trang thai hien tai: " + booking.getStatus() + ")");
+        }
+
+        // Kiem tra chua toi gio chieu
+        if (booking.getShowtime().getStartTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Khong the huy ve khi suat chieu da bat dau hoac da ket thuc");
+        }
+
+        // Cap nhat trang thai cac BookingSeat -> CANCELLED
+        List<BookingSeat> bookingSeats = bookingSeatRepository.findByBookingId(bookingId);
+        for (BookingSeat bs : bookingSeats) {
+            bs.setStatus(BookingSeatStatus.CANCELLED);
+            bookingSeatRepository.save(bs);
+        }
+
+        // Cap nhat trang thai Booking -> CANCELLED
+        booking.setStatus(BookingStatus.CANCELLED);
+        return bookingRepository.save(booking);
+    }
+
     // Ghe duoc coi la "khong the chon" doi voi nguoi dung khac neu: da BOOKED/USED,
     // hoac dang HELD ma booking cha van con han giu (chua qua expiresAt).
     private Set<Long> findTakenSeatIds(Long showtimeId) {

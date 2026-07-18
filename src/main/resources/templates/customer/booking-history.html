@@ -1,64 +1,261 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Lịch sử đặt vé</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <th:block th:replace="~{layout/header :: header-head}"></th:block>
+    <title>Lịch Sử Đặt Vé - CinemaX</title>
+    <style>
+        html body { background-color: #f8f9fa !important; }
+        .history-header {
+            text-align: center;
+            padding: 32px 0 16px;
+        }
+        .history-header h2 {
+            font-weight: 700;
+            color: #111827;
+        }
+        .history-header p {
+            color: var(--text-muted);
+        }
+        .booking-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .booking-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .booking-card-body {
+            padding: 20px 24px;
+        }
+        .booking-movie-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+        .booking-code {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+        .booking-detail {
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+        .booking-detail i {
+            width: 18px;
+            text-align: center;
+            margin-right: 6px;
+            color: var(--accent);
+        }
+        .booking-total {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .badge-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .badge-paid {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .badge-confirmed {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .badge-cancelled {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .badge-expired {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .btn-cancel {
+            background-color: #fff;
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover {
+            background-color: #fef2f2;
+            border-color: #dc2626;
+            color: #dc2626;
+        }
+        .btn-pay {
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .btn-pay:hover {
+            background: linear-gradient(135deg, #e11d48, #f43f5e);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(244, 63, 94, 0.3);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: #d1d5db;
+        }
+        .seat-chip-sm {
+            display: inline-block;
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin: 1px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #f43f5e;
+        }
+    </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-  <h2 class="mb-4">Lịch sử đặt vé của bạn</h2>
+<body>
+<div th:replace="~{layout/header :: navbar}"></div>
 
-  <!-- Thông báo từ Controller -->
-  <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
-  <div th:if="${errorMsg}" class="alert alert-danger" th:text="${errorMsg}"></div>
-
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <table class="table table-hover align-middle">
-        <thead class="table-dark">
-        <tr>
-          <th>Mã Đơn</th>
-          <th>Phim</th>
-          <th>Rạp</th>
-          <th>Giờ chiếu</th>
-          <th>Tổng tiền</th>
-          <th>Trạng thái</th>
-          <th>Hành động</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="b : ${bookings}">
-          <td th:text="'#' + ${b.id}">#1</td>
-          <td th:text="${b.showtime.movie.title}">Lật Mặt 7</td>
-          <td th:text="${b.showtime.room.cinema.name}">Beta Mỹ Đình</td>
-          <td th:text="${#temporals.format(b.showtime.startTime, 'dd/MM/yyyy HH:mm')}">30/06/2026 20:00</td>
-          <td th:text="${#numbers.formatDecimal(b.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">100,000 VNĐ</td>
-          <td>
-            <!-- Badge trạng thái Bootstrap -->
-            <span th:if="${b.status == 'PENDING'}" class="badge bg-warning text-dark">Chờ thanh toán</span>
-            <span th:if="${b.status == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
-            <span th:if="${b.status == 'CANCELLED'}" class="badge bg-danger">Đã hủy</span>
-            <span th:if="${b.status == 'USED'}" class="badge bg-secondary">Đã sử dụng</span>
-          </td>
-          <td>
-            <!-- Nút Thanh toán tiếp nếu đang PENDING -->
-            <a th:if="${b.status == 'PENDING'}" th:href="@{/customer/payment/{id}(id=${b.id})}" class="btn btn-sm btn-primary">Thanh toán</a>
-
-            <!-- Form Hủy vé nếu đang PENDING -->
-            <form th:if="${b.status == 'PENDING'}" th:action="@{/customer/cancel}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này không?');">
-              <input type="hidden" name="bookingId" th:value="${b.id}">
-              <button type="submit" class="btn btn-sm btn-outline-danger">Hủy vé</button>
-            </form>
-
-            <!-- Nút Xem vé nếu đã PAID -->
-            <a th:if="${b.status == 'PAID'}" th:href="@{/customer/ticket/{id}(id=${b.id})}" class="btn btn-sm btn-success">Xem vé</a>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+<main class="container" style="max-width: 800px;">
+    <div class="history-header">
+        <h2><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử đặt vé</h2>
+        <p>Quản lý tất cả đơn đặt vé của bạn</p>
     </div>
-  </div>
-</div>
+
+    <!-- Flash messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i>
+        <span th:text="${success}">Thành công</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i>
+        <span th:text="${error}">Lỗi</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Empty state -->
+    <div th:if="${#lists.isEmpty(bookings)}" class="empty-state">
+        <div><i class="fa-solid fa-ticket"></i></div>
+        <h5>Bạn chưa có đơn đặt vé nào</h5>
+        <p>Hãy khám phá lịch chiếu và đặt vé ngay!</p>
+        <a href="/showtime" class="btn btn-accent mt-2">Xem lịch chiếu</a>
+    </div>
+
+    <!-- Booking list -->
+    <div th:each="booking : ${bookings}" class="booking-card">
+        <div class="booking-card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                    <div class="booking-movie-title" th:text="${booking.showtime.movie.title}">Tên phim</div>
+                    <div class="booking-code">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <span th:text="${booking.bookingCode}">BK...</span>
+                    </div>
+                </div>
+                <div>
+                    <!-- Status badge -->
+                    <span th:switch="${booking.status.name()}">
+                        <span th:case="'PENDING'" class="status-badge badge-pending">Chờ thanh toán</span>
+                        <span th:case="'PAID'" class="status-badge badge-paid">Đã thanh toán</span>
+                        <span th:case="'CONFIRMED'" class="status-badge badge-confirmed">Đã xác nhận</span>
+                        <span th:case="'CANCELLED'" class="status-badge badge-cancelled">Đã hủy</span>
+                        <span th:case="'EXPIRED'" class="status-badge badge-expired">Hết hạn</span>
+                    </span>
+                </div>
+            </div>
+
+            <hr class="my-2" style="border-color: #e5e7eb;">
+
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="booking-detail">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span th:text="${booking.showtime.room.cinema.name}">Tên rạp</span>
+                    </div>
+                    <div class="booking-detail">
+                        <i class="fa-solid fa-door-open"></i>
+                        <span th:text="${booking.showtime.room.name}">Tên phòng</span>
+                    </div>
+                    <div class="booking-detail">
+                        <i class="fa-solid fa-calendar"></i>
+                        <span th:text="${#temporals.format(booking.showtime.startTime, 'HH:mm - dd/MM/yyyy')}">20:45 - 02/07/2026</span>
+                    </div>
+                    <div class="booking-detail mt-1">
+                        <i class="fa-solid fa-couch"></i>
+                        Ghế: <span th:text="${booking.showtime != null ? '' : 'N/A'}"></span>
+                    </div>
+                </div>
+                <div class="col-md-5 text-md-end d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="booking-detail text-muted" style="font-size: 0.8rem;">
+                            <i class="fa-regular fa-clock"></i>
+                            Đặt lúc: <span th:text="${#temporals.format(booking.createdAt, 'HH:mm dd/MM/yyyy')}">10:30 01/07/2026</span>
+                        </div>
+                        <div class="booking-total mt-1">
+                            <span th:text="${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT')}">0</span> đ
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="mt-2 d-flex gap-2 justify-content-md-end">
+                        <!-- Nut Thanh toan: chi hien khi PENDING -->
+                        <a th:if="${booking.status.name() == 'PENDING'}"
+                           th:href="@{/booking/checkout/{id}(id=${booking.id})}"
+                           class="btn btn-pay btn-sm">
+                            <i class="fa-solid fa-credit-card me-1"></i>Thanh toán
+                        </a>
+
+                        <!-- Nut Huy ve: chi hien khi PENDING va chua toi gio chieu -->
+                        <form th:if="${booking.status.name() == 'PENDING' && booking.showtime.startTime.isAfter(T(java.time.LocalDateTime).now())}"
+                              th:action="@{/booking/{id}/cancel(id=${booking.id})}"
+                              method="post"
+                              style="display: inline;"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn đặt vé này không?');">
+                            <button type="submit" class="btn btn-cancel btn-sm">
+                                <i class="fa-solid fa-xmark me-1"></i>Hủy vé
+                            </button>
+                        </form>
+
+                        <!-- Nut Xem chi tiet: khi PAID hoac CONFIRMED -->
+                        <a th:if="${booking.status.name() == 'PAID' || booking.status.name() == 'CONFIRMED'}"
+                           th:href="@{/booking/success/{id}(id=${booking.id})}"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fa-solid fa-eye me-1"></i>Xem vé
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

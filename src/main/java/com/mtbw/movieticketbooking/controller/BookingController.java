@@ -161,6 +161,30 @@ public class BookingController {
         return "BookingSuccess";
     }
 
+    // UC05 - Booking History: hien thi danh sach don dat ve cua customer dang dang nhap.
+    @GetMapping("/history")
+    public String history(Authentication authentication, Model model) {
+        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        List<Booking> bookings = bookingService.getBookingsByUser(principal.getUser().getId());
+        model.addAttribute("bookings", bookings);
+        return "customer/booking-history";
+    }
+
+    // UC10 - Cancel Ticket: huy ve PENDING truoc gio chieu.
+    @PostMapping("/{bookingId}/cancel")
+    public String cancel(@PathVariable Long bookingId,
+                         Authentication authentication,
+                         RedirectAttributes redirectAttributes) {
+        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        try {
+            bookingService.cancelBooking(bookingId, principal.getUser().getId());
+            redirectAttributes.addFlashAttribute("success", "Đã hủy đơn đặt vé thành công!");
+        } catch (IllegalStateException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/booking/history";
+    }
+
     // VietQR "quick link" API - khong can API key, tra ve thang anh PNG de nhung vao <img>.
     // Doc them: https://www.vietqr.io/danh-sach-api/link-tao-nhanh-ma-vietqr/
     private String buildVietQrUrl(long amount, String content) {
