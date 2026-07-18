@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/admin-header :: admin-head}">
+    <title>Quản Lý Lịch Chiếu - CinemaX Admin</title>
+</head>
+<body>
+<div th:replace="~{layout/admin-header :: admin-navbar}"></div>
+
+<main class="container-fluid px-4 py-4 fade-in">
+    <!-- ===== Page Header ===== -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">
+                <i class="fa-solid fa-calendar-days me-2" style="color: #e11d48;"></i>Quản Lý Lịch Chiếu
+            </h1>
+            <p class="text-muted mb-0 small">Quản lý lịch chiếu phim tại các phòng chiếu, thiết lập giá vé và trạng thái suất chiếu.</p>
+        </div>
+        <a href="/admin/showtimes/new" class="btn btn-accent">
+            <i class="fa-solid fa-plus me-2"></i>Thêm Lịch Chiếu Mới
+        </a>
+    </div>
+
+    <!-- ===== Alert Notifications ===== -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show border-0 rounded-3 mb-4" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>
+        <span th:text="${successMessage}">Thành công!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show border-0 rounded-3 mb-4" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        <span th:text="${errorMessage}">Lỗi!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ===== Filter & Search Bar ===== -->
+    <div class="admin-card p-3 mb-4">
+        <form th:action="@{/admin/showtimes}" method="get" class="row g-3 align-items-end">
+            <!-- Filter Movie -->
+            <div class="col-md-3">
+                <label for="filterMovie" class="form-label text-muted small fw-semibold">Lọc theo phim</label>
+                <select name="movieId" id="filterMovie" class="form-select form-select-sm">
+                    <option value="">-- Tất cả phim --</option>
+                    <option th:each="m : ${movies}" th:value="${m.id}" th:text="${m.title}"
+                            th:selected="${m.id == selectedMovieId}"></option>
+                </select>
+            </div>
+
+            <!-- Filter Cinema -->
+            <div class="col-md-3">
+                <label for="filterCinema" class="form-label text-muted small fw-semibold">Lọc theo rạp</label>
+                <select name="cinemaId" id="filterCinema" class="form-select form-select-sm">
+                    <option value="">-- Tất cả rạp --</option>
+                    <option th:each="c : ${cinemas}" th:value="${c.id}" th:text="${c.name}"
+                            th:selected="${c.id == selectedCinemaId}"></option>
+                </select>
+            </div>
+
+            <!-- Filter Date -->
+            <div class="col-md-2">
+                <label for="filterDate" class="form-label text-muted small fw-semibold">Lọc theo ngày</label>
+                <input type="date" name="date" id="filterDate" class="form-control form-control-sm"
+                       th:value="${selectedDate}">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-dark btn-sm px-3">
+                    <i class="fa-solid fa-filter me-1"></i>Lọc
+                </button>
+                <a th:href="@{/admin/showtimes}" class="btn btn-outline-secondary btn-sm px-3" th:if="${selectedMovieId != null || selectedCinemaId != null || selectedDate != null}">
+                    <i class="fa-solid fa-rotate-left me-1"></i>Đặt lại
+                </a>
+                <div class="position-relative ms-auto" style="min-width: 180px;">
+                    <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8rem;"></i>
+                    <input type="text" id="showtimeSearch" class="form-control form-control-sm ps-4"
+                           placeholder="Tìm phim, rạp...">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== Showtime Table ===== -->
+    <div class="admin-card overflow-hidden">
+        <div class="p-3 d-flex justify-content-between align-items-center" style="background: #e9ecef; border-bottom: 1px solid var(--border-color);">
+            <span class="fw-semibold text-muted small text-uppercase">
+                <i class="fa-solid fa-list me-1"></i>
+                <span th:text="${#lists.size(showtimes)}">0</span> Suất chiếu
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-admin align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 5%;">ID</th>
+                        <th style="width: 25%;">Phim</th>
+                        <th style="width: 20%;">Rạp & Phòng chiếu</th>
+                        <th class="text-center" style="width: 20%;">Thời Gian Chiếu</th>
+                        <th class="text-center" style="width: 12%;">Giá Vé</th>
+                        <th class="text-center" style="width: 10%;">Trạng Thái</th>
+                        <th class="text-center" style="width: 8%;">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="showtimeTableBody">
+                    <tr th:each="st : ${showtimes}">
+                        <td class="text-center text-muted fw-semibold" th:text="${st.id}">1</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <img th:src="${st.movie.posterUrl != null and !st.movie.posterUrl.isEmpty() ? st.movie.posterUrl : 'https://via.placeholder.com/50x72/e9ecef/495057?text=N/A'}"
+                                     class="poster-thumb" style="width: 40px; height: 58px;" alt="Poster">
+                                <div>
+                                    <div class="fw-bold text-dark" th:text="${st.movie.title}">Tên Phim</div>
+                                    <small class="text-muted"><i class="fa-regular fa-clock me-1"></i><span th:text="${st.movie.durationMinutes} + ' phút'">120 phút</span></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${st.room.cinema.name}">Tên Rạp</div>
+                            <small class="text-muted d-block">
+                                <i class="fa-solid fa-door-open me-1"></i><span th:text="${st.room.name}">Phòng 1</span> 
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary ms-1 small" th:text="${st.room.screenType}">STANDARD</span>
+                            </small>
+                        </td>
+                        <td class="text-center">
+                            <div class="fw-bold text-dark">
+                                <span th:text="${#temporals.format(st.startTime, 'HH:mm')}">14:30</span> - 
+                                <span th:text="${#temporals.format(st.endTime, 'HH:mm')}">16:30</span>
+                            </div>
+                            <small class="text-muted d-block">
+                                <i class="fa-regular fa-calendar me-1"></i><span th:text="${#temporals.format(st.startTime, 'dd/MM/yyyy')}">15/07/2026</span>
+                            </small>
+                        </td>
+                        <td class="text-center fw-bold text-accent">
+                            <span th:text="${st.price != null ? #numbers.formatDecimal(st.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : '0 VNĐ'}">120,000 VNĐ</span>
+                        </td>
+                        <td class="text-center">
+                            <span th:if="${st.status.name() == 'OPEN'}" class="badge-status badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">
+                                <i class="fa-solid fa-circle fa-xs me-1"></i>Mở bán
+                            </span>
+                            <span th:if="${st.status.name() == 'SOLD_OUT'}" class="badge-status badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25">
+                                <i class="fa-solid fa-circle fa-xs me-1"></i>Hết vé
+                            </span>
+                            <span th:if="${st.status.name() == 'CLOSED'}" class="badge-status badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25">
+                                <i class="fa-solid fa-circle fa-xs me-1"></i>Đóng
+                            </span>
+                            <span th:if="${st.status.name() == 'CANCELLED'}" class="badge-status badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">
+                                <i class="fa-solid fa-ban fa-xs me-1"></i>Đã hủy
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <a th:href="@{'/admin/showtimes/edit/' + ${st.id}}" class="btn btn-outline-info btn-sm px-2" title="Chỉnh sửa">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <form th:action="@{'/admin/showtimes/delete/' + ${st.id}}" method="post"
+                                      onsubmit="return confirm('⚠️ Bạn có chắc chắn muốn xóa lịch chiếu này vĩnh viễn? Hành động này không thể hoàn tác!');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm px-2" title="Xóa lịch chiếu">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty State -->
+                    <tr th:if="${#lists.isEmpty(showtimes)}">
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fa-solid fa-calendar-xmark fa-3x mb-3" style="opacity: 0.3;"></i>
+                                <p class="mb-2">Không có lịch chiếu nào khớp với bộ lọc đã chọn.</p>
+                                <a href="/admin/showtimes/new" class="btn btn-accent btn-sm mt-2">
+                                    <i class="fa-solid fa-plus me-1"></i>Thêm lịch chiếu mới
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="mt-auto py-3" style="background-color: #f8f9fa; border-top: 1px solid rgba(0,0,0,0.1);">
+    <div class="container text-center text-muted small">
+        <p class="mb-0">&copy; 2026 CinemaX Admin Panel &middot; HSF302 Project</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</footer>
+
+<script>
+    // Client-side quick search
+    document.getElementById('showtimeSearch').addEventListener('keyup', function() {
+        const keyword = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#showtimeTableBody tr');
+        rows.forEach(row => {
+            if (row.cells.length > 2) {
+                const movie = row.cells[1].textContent.toLowerCase();
+                const room = row.cells[2].textContent.toLowerCase();
+                row.style.display = (movie.includes(keyword) || room.includes(keyword)) ? '' : 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>

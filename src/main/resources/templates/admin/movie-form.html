@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/admin-header :: admin-head}">
+    <title>Thêm/Sửa Phim - CinemaX Admin</title>
+</head>
+<body>
+<div th:replace="~{layout/admin-header :: admin-navbar}"></div>
+
+<main class="container-fluid px-4 py-4 fade-in">
+    <!-- ===== Page Header ===== -->
+    <div class="mb-4">
+        <a href="/admin/movies" class="text-muted text-decoration-none small d-inline-block mb-3" style="transition: color 0.2s;"
+           onmouseover="this.style.color='#e11d48'" onmouseout="this.style.color=''">
+            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách phim
+        </a>
+        <h1 class="h3 fw-bold text-dark">
+            <i class="fa-solid fa-film me-2" style="color: #e11d48;"></i>
+            <span th:text="${isEdit ? 'Chỉnh Sửa Thông Tin Phim' : 'Thêm Phim Mới'}">Thêm Phim Mới</span>
+        </h1>
+        <p class="text-muted small" th:text="${isEdit ? 'Cập nhật thông tin chi tiết cho phim.' : 'Nhập thông tin chi tiết để thêm phim mới vào hệ thống.'}"></p>
+    </div>
+
+    <!-- ===== Form Content ===== -->
+    <form th:action="@{/admin/movies/save}" th:object="${movie}" method="post" enctype="multipart/form-data">
+
+        <!-- Hidden ID field -->
+        <input type="hidden" th:field="*{id}" />
+        <!-- Hidden posterUrl to preserve existing value -->
+        <input type="hidden" th:field="*{posterUrl}" id="hiddenPosterUrl" />
+
+        <div class="row g-4">
+            <!-- ===== Left Column: Main Info ===== -->
+            <div class="col-lg-8">
+                <div class="admin-card p-4">
+                    <h5 class="fw-semibold text-dark mb-4"><i class="fa-solid fa-circle-info me-2 text-info"></i>Thông tin cơ bản</h5>
+
+                    <!-- Title -->
+                    <div class="mb-4">
+                        <label for="title" class="form-label text-dark fw-semibold">Tên phim <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{title}" class="form-control" id="title" placeholder="Nhập tên phim" required>
+                        <div class="text-danger small mt-1" th:if="${titleError}" th:text="${titleError}"></div>
+                    </div>
+
+                    <!-- Genre & Age Rating -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="genre" class="form-label text-dark fw-semibold">Thể loại</label>
+                            <input type="text" th:field="*{genre}" class="form-control" id="genre"
+                                   placeholder="VD: Hành động, Viễn tưởng">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="ageRating" class="form-label text-dark fw-semibold">Phân loại độ tuổi</label>
+                            <select th:field="*{ageRating}" class="form-select" id="ageRating">
+                                <option value="P">P - Phù hợp mọi lứa tuổi</option>
+                                <option value="K">K - Dưới 13 tuổi cần người lớn đi kèm</option>
+                                <option value="T13">T13 - Cấm khán giả dưới 13 tuổi</option>
+                                <option value="T16">T16 - Cấm khán giả dưới 16 tuổi</option>
+                                <option value="T18">T18 - Cấm khán giả dưới 18 tuổi</option>
+                                <option value="C">C - Không được phép phổ biến</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Duration & Release Date -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="durationMinutes" class="form-label text-dark fw-semibold">Thời lượng (phút) <span class="text-danger">*</span></label>
+                            <input type="number" th:field="*{durationMinutes}" class="form-control" id="durationMinutes"
+                                   min="1" placeholder="VD: 120" required>
+                            <div class="text-danger small mt-1" th:if="${durationError}" th:text="${durationError}"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="releaseDate" class="form-label text-dark fw-semibold">Ngày khởi chiếu</label>
+                            <input type="date" th:field="*{releaseDate}" class="form-control" id="releaseDate">
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-4">
+                        <label for="status" class="form-label text-dark fw-semibold">Trạng thái phim</label>
+                        <select th:field="*{status}" class="form-select" id="status" style="max-width: 300px;">
+                            <option th:each="st : ${statuses}" th:value="${st}"
+                                    th:text="${st.name() == 'NOW_SHOWING' ? 'Đang chiếu' : (st.name() == 'COMING_SOON' ? 'Sắp chiếu' : (st.name() == 'ENDED' ? 'Đã kết thúc' : 'Ẩn'))}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-0">
+                        <label for="description" class="form-label text-dark fw-semibold">Mô tả nội dung phim</label>
+                        <textarea th:field="*{description}" class="form-control" id="description" rows="5"
+                                  placeholder="Nhập tóm tắt nội dung phim..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Right Column: Poster Upload & Preview ===== -->
+            <div class="col-lg-4">
+                <!-- Poster Upload Card -->
+                <div class="admin-card p-4 mb-4">
+                    <h5 class="fw-semibold text-dark mb-4"><i class="fa-regular fa-image me-2" style="color: #e11d48;"></i>Ảnh Poster</h5>
+
+                    <!-- Preview -->
+                    <div class="text-center mb-4">
+                        <img id="previewPoster"
+                             th:src="${movie.posterUrl != null and !movie.posterUrl.isEmpty() ? movie.posterUrl : 'https://via.placeholder.com/240x360/e9ecef/495057?text=No+Poster'}"
+                             class="img-fluid rounded-3 shadow"
+                             style="width: 200px; height: 300px; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); background: #f8f9fa;"
+                             alt="Poster Preview">
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="mb-3">
+                        <label for="posterFile" class="form-label text-muted small fw-semibold">Upload ảnh poster mới</label>
+                        <input type="file" class="form-control" id="posterFile" name="posterFile"
+                               accept="image/jpeg,image/png,image/webp,image/gif">
+                        <div class="form-text text-muted small mt-1">Hỗ trợ: JPG, PNG, WEBP, GIF. Tối đa 10MB.</div>
+                    </div>
+
+                    <!-- Or URL input -->
+                    <div class="mt-3 pt-3" style="border-top: 1px solid var(--border-color);">
+                        <label for="posterUrlInput" class="form-label text-muted small fw-semibold">Hoặc nhập URL ảnh poster</label>
+                        <input type="url" class="form-control form-control-sm" id="posterUrlInput"
+                               th:value="${movie.posterUrl}" placeholder="https://example.com/poster.jpg">
+                        <div class="form-text text-muted small mt-1">URL sẽ chỉ được dùng nếu không upload file.</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="admin-card p-4">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-accent py-2">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>
+                            <span th:text="${isEdit ? 'Cập nhật phim' : 'Thêm phim mới'}">Lưu lại</span>
+                        </button>
+                        <a href="/admin/movies" class="btn btn-outline-secondary py-2">
+                            <i class="fa-solid fa-xmark me-2"></i>Hủy bỏ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</main>
+
+<!-- Footer -->
+<footer class="mt-auto py-3" style="background-color: #f8f9fa; border-top: 1px solid rgba(0,0,0,0.1);">
+    <div class="container text-center text-muted small">
+        <p class="mb-0">&copy; 2026 CinemaX Admin Panel &middot; HSF302 Project</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</footer>
+
+<script>
+    const previewImg = document.getElementById('previewPoster');
+    const fileInput = document.getElementById('posterFile');
+    const urlInput = document.getElementById('posterUrlInput');
+    const hiddenPosterUrl = document.getElementById('hiddenPosterUrl');
+    const defaultPlaceholder = 'https://via.placeholder.com/240x360/e9ecef/495057?text=Ch%C6%B0a+c%C3%B3+poster';
+
+    // Preview khi chọn file upload
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+            };
+            reader.readAsDataURL(this.files[0]);
+            // Xóa URL input khi đã chọn file
+            urlInput.value = '';
+            hiddenPosterUrl.value = '';
+        }
+    });
+
+    // Preview khi nhập URL
+    urlInput.addEventListener('input', function() {
+        const url = this.value.trim();
+        if (url) {
+            previewImg.src = url;
+            hiddenPosterUrl.value = url;
+        } else {
+            previewImg.src = defaultPlaceholder;
+            hiddenPosterUrl.value = '';
+        }
+    });
+
+    // Fallback nếu ảnh lỗi
+    previewImg.addEventListener('error', function() {
+        this.src = defaultPlaceholder;
+    });
+</script>
+</body>
+</html>
