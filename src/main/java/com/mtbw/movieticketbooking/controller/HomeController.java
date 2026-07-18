@@ -20,7 +20,7 @@ public class HomeController {
 
     private final ShowtimeService showtimeService;
 
-    @GetMapping("/home")
+    @GetMapping({"/", "/home"})
     public String home(Model model) {
         model.addAttribute("nowShowingMovies", movieService.findByStatus(MovieStatus.NOW_SHOWING));
         model.addAttribute("comingSoonMovies", movieService.findByStatus(MovieStatus.COMING_SOON));
