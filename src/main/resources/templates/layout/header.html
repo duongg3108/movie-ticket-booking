@@ -9,12 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
+            --bg-dark: #ffffff;
+            --bg-card: #f8f9fa;
             --accent: #f43f5e;
             --accent-hover: #e11d48;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --text-main: #1a1a2e;
+            --text-muted: #6c757d;
+            --border-color: rgba(0,0,0,0.1);
         }
         body {
             background-color: var(--bg-dark);
@@ -25,9 +26,10 @@
             flex-direction: column;
         }
         .navbar-custom {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
         .navbar-brand {
             font-weight: 700;
@@ -60,33 +62,33 @@
     </style>
 </head>
 <body>
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-custom sticky-top">
     <div class="container">
         <a class="navbar-brand" href="/"><i class="fa-solid fa-film me-2"></i>CinemaX</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <i class="fa-solid fa-bars" style="color: var(--text-main);"></i>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
-                <li class="nav-item"><a class="nav-link" href="/movies">Lịch chiếu & Phim</a></li>
+                <li class="nav-item"><a class="nav-link" href="/showtime">Lịch chiếu &amp; Phim</a></li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link text-warning" href="/admin/movies"><i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)</a>
+                    <a class="nav-link" href="/admin/movies" style="color: #f59e0b !important;"><i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('STAFF')">
-                    <a class="nav-link text-info" href="/staff/tickets"><i class="fa-solid fa-qrcode me-1"></i>Soát vé (Staff)</a>
+                    <a class="nav-link" href="/staff/tickets" style="color: #0ea5e9 !important;"><i class="fa-solid fa-qrcode me-1"></i>Soát vé (Staff)</a>
                 </li>
             </ul>
             <div class="d-flex align-items-center gap-3">
                 <div sec:authorize="isAnonymous()">
-                    <a href="/login" class="btn btn-outline-light me-2 btn-sm">Đăng nhập</a>
+                    <a href="/login" class="btn btn-outline-dark me-2 btn-sm">Đăng nhập</a>
                     <a href="/register" class="btn btn-accent btn-sm">Đăng ký</a>
                 </div>
                 <div sec:authorize="isAuthenticated()" class="dropdown">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="fa-solid fa-user me-1"></i><span sec:authentication="name">User</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/booking/history">Lịch sử đặt vé</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>

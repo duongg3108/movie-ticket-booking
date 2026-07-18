@@ -7,6 +7,8 @@ import com.mtbw.movieticketbooking.entity.Movie;
 import com.mtbw.movieticketbooking.entity.Showtime;
 import com.mtbw.movieticketbooking.enums.ScreenType;
 import com.mtbw.movieticketbooking.enums.ShowtimeStatus;
+import com.mtbw.movieticketbooking.enums.MovieStatus;
+import com.mtbw.movieticketbooking.repository.MovieRepository;
 import com.mtbw.movieticketbooking.repository.ShowtimeRepository;
 import com.mtbw.movieticketbooking.service.ShowtimeService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
 
     private final ShowtimeRepository showtimeRepository;
+    private final MovieRepository movieRepository;
 
     @Override
     public List<Showtime> findAll() {
@@ -71,21 +74,34 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         List<Showtime> showtimes = showtimeRepository
                 .findByRoom_Cinema_IdAndStartTimeBetweenOrderByStartTimeAsc(cinemaId, start, end);
 
-        // Buoc 1: gom theo movieId (khong dung Movie lam key truc tiep - tranh loi equals/hashCode)
+        // Group showtimes by movieId
         LinkedHashMap<Long, List<Showtime>> byMovieId = new LinkedHashMap<>();
-        LinkedHashMap<Long, Movie> movieCache = new LinkedHashMap<>();
         for (Showtime s : showtimes) {
             if (s.getStatus() == ShowtimeStatus.CANCELLED) continue;
             Long movieId = s.getMovie().getId();
             byMovieId.computeIfAbsent(movieId, k -> new ArrayList<>()).add(s);
-            movieCache.putIfAbsent(movieId, s.getMovie());
         }
 
-        // Buoc 2: voi moi phim, gom tiep theo screenType that su co trong DB (rooms.screen_type)
+        // Fetch all active movies (NOW_SHOWING)
+        List<Movie> activeMovies = movieRepository.findByStatus(MovieStatus.NOW_SHOWING);
+
+        // Union of active movies + any other movie that has showtimes on this date
+        LinkedHashMap<Long, Movie> moviesToInclude = new LinkedHashMap<>();
+        for (Movie m : activeMovies) {
+            moviesToInclude.put(m.getId(), m);
+        }
+        for (Showtime s : showtimes) {
+            if (s.getStatus() == ShowtimeStatus.CANCELLED) continue;
+            Movie m = s.getMovie();
+            if (m.getStatus() != MovieStatus.ENDED && m.getStatus() != MovieStatus.HIDDEN) {
+                moviesToInclude.putIfAbsent(m.getId(), m);
+            }
+        }
+
         List<MovieSchedule> result = new ArrayList<>();
-        for (Long movieId : byMovieId.keySet()) {
-            Movie movie = movieCache.get(movieId);
-            List<Showtime> movieShowtimes = byMovieId.get(movieId);
+        for (Long movieId : moviesToInclude.keySet()) {
+            Movie movie = moviesToInclude.get(movieId);
+            List<Showtime> movieShowtimes = byMovieId.getOrDefault(movieId, new ArrayList<>());
 
             LinkedHashMap<ScreenType, List<ShowtimeSlot>> byScreenType = new LinkedHashMap<>();
             for (Showtime s : movieShowtimes) {
