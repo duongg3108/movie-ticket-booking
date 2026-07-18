@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
 <head th:fragment="header-head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
+            --bg-dark: #f8f9fa;
+            --bg-card: #ffffff;
             --accent: #f43f5e;
             --accent-hover: #e11d48;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
         }
         body {
             background-color: var(--bg-dark);
@@ -25,9 +25,9 @@
             flex-direction: column;
         }
         .navbar-custom {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
         }
         .navbar-brand {
             font-weight: 700;
@@ -35,7 +35,7 @@
             color: var(--accent) !important;
         }
         .nav-link {
-            color: var(--text-main) !important;
+            color: #334155 !important;
             font-weight: 500;
             transition: color 0.2s;
         }
@@ -60,7 +60,7 @@
     </style>
 </head>
 <body>
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
     <div class="container">
         <a class="navbar-brand" href="/"><i class="fa-solid fa-film me-2"></i>CinemaX</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -74,19 +74,25 @@
                     <a class="nav-link text-warning" href="/admin/movies"><i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)</a>
                 </li>
                 <li class="nav-item" sec:authorize="hasRole('STAFF')">
-                    <a class="nav-link text-info" href="/staff/tickets"><i class="fa-solid fa-qrcode me-1"></i>Soát vé (Staff)</a>
+                    <a class="nav-link text-info" href="/staff/tickets">Soát vé</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('STAFF')">
+                    <a class="nav-link text-info" href="/staff/dashboard">Suất chiếu</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('STAFF')">
+                    <a class="nav-link text-info" href="/staff/bookings">Duyệt Booking</a>
                 </li>
             </ul>
             <div class="d-flex align-items-center gap-3">
                 <div sec:authorize="isAnonymous()">
-                    <a href="/login" class="btn btn-outline-light me-2 btn-sm">Đăng nhập</a>
+                    <a href="/login" class="btn btn-outline-dark me-2 btn-sm">Đăng nhập</a>
                     <a href="/register" class="btn btn-accent btn-sm">Đăng ký</a>
                 </div>
                 <div sec:authorize="isAuthenticated()" class="dropdown">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="fa-solid fa-user me-1"></i><span sec:authentication="name">User</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="/booking/history">Lịch sử đặt vé</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>

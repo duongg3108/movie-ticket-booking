@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layout/header :: header-head}">
+    <title>Dashboard Suất Chiếu - Staff</title>
+</head>
+<body style="background-color: #f4f6f9 !important; color: #212529 !important;">
+<div th:replace="~{layout/header :: navbar}"></div>
+
+<main class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 fw-bold border-start border-4 border-danger ps-3" style="color: #212529;">
+            <i></i>Suất Chiếu Hôm Nay
+        </h2>
+        <span class="badge bg-danger p-2 fs-6" th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">01/07/2026</span>
+    </div>
+
+    <!-- Bảng danh sách suất chiếu sáng sủa -->
+    <div class="card bg-white border-0 shadow-sm p-4" style="border-radius: 12px;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" style="color: #212529;">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Phim</th>
+                    <th scope="col" class="text-center">Phòng chiếu</th>
+                    <th scope="col" class="text-center">Bắt đầu</th>
+                    <th scope="col" class="text-center">Kết thúc</th>
+                    <th scope="col" class="text-end">Giá vé gốc</th>
+                    <th scope="col" class="text-center">Trạng thái</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Lặp qua danh sách suất chiếu gửi từ Service -->
+                <tr th:each="st, iter : ${todayShowtimes}">
+                    <td class="fw-bold" th:text="${iter.count}">1</td>
+                    <td>
+                        <div class="fw-bold text-dark" th:text="${st.movie.title}">Galaxy Warriors</div>
+                        <small class="text-muted" th:text="${st.movie.genre}">Thể loại</small>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-light text-dark border" th:text="${st.room.name}">Room A1</span>
+                    </td>
+                    <td class="text-center fw-bold" th:text="${#temporals.format(st.startTime, 'HH:mm')}">09:00</td>
+                    <td class="text-center text-muted" th:text="${#temporals.format(st.endTime, 'HH:mm')}">11:08</td>
+                    <td class="text-end fw-bold text-danger" th:text="${#numbers.formatDecimal(st.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">85,000 đ</td>
+                    <td class="text-center">
+                        <!-- Trạng thái màu sắc linh hoạt -->
+                        <span class="badge"
+                              th:classappend="${st.status.name() == 'OPEN' ? 'bg-success' : (st.status.name() == 'SOLD_OUT' ? 'bg-warning text-dark' : 'bg-secondary')}"
+                              th:text="${st.status}">OPEN</span>
+                    </td>
+                </tr>
+                <!-- Hiển thị khi không có suất chiếu nào -->
+                <tr th:if="${#lists.isEmpty(todayShowtimes)}">
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="fa-solid fa-circle-info display-4 mb-3 text-secondary"></i>
+                        <p class="mb-0">Hôm nay không có suất chiếu nào tại rạp.</p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{layout/footer :: footer}"></div>
+</body>
+</html>

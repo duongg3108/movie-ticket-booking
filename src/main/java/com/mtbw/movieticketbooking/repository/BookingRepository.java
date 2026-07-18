@@ -3,7 +3,7 @@ package com.mtbw.movieticketbooking.repository;
 import com.mtbw.movieticketbooking.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
+import com.mtbw.movieticketbooking.enums.BookingStatus;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
     Optional<Booking> findByBookingCode(String bookingCode);
+    List<Booking> findByStatusOrderByCreatedAtDesc(BookingStatus status);
 }
