@@ -33,7 +33,7 @@
                       th:text="${'Khởi chiếu: ' + #temporals.format(movie.releaseDate, 'dd/MM/yyyy')}">Khởi chiếu</span>
             </div>
 
-            <h5 class="text-white mb-2">Nội dung phim</h5>
+            <h5 class="text-dark mb-2">Nội dung phim</h5>
             <p class="text-muted"
                th:text="${movie.description != null ? movie.description : 'Đang cập nhật nội dung phim.'}">
                 Mô tả phim...
@@ -47,11 +47,11 @@
 
     <!-- Suất chiếu sắp tới -->
     <section class="mt-5">
-        <h2 class="h4 fw-bold text-white mb-4 border-start border-4 border-danger ps-3">Suất Chiếu Sắp Tới</h2>
+        <h2 class="h4 fw-bold text-dark mb-4 border-start border-4 border-danger ps-3">Suất Chiếu Sắp Tới</h2>
 
         <div th:if="${not #lists.isEmpty(upcomingShowtimes)}" class="row row-cols-1 row-cols-md-3 g-3">
             <div class="col" th:each="st : ${upcomingShowtimes}">
-                <div class="card h-100 bg-dark text-white border-secondary">
+                <div class="card h-100 bg-light text-dark border shadow-sm">
                     <div class="card-body">
                         <h6 class="card-title fw-bold mb-1" th:text="${st.room.cinema.name}">Rạp</h6>
                         <p class="card-text text-muted small mb-2" th:text="${st.room.cinema.address}">Địa chỉ</p>
@@ -64,7 +64,7 @@
             </div>
         </div>
 
-        <div th:if="${#lists.isEmpty(upcomingShowtimes)}" class="alert alert-dark text-center py-4 text-muted">
+        <div th:if="${#lists.isEmpty(upcomingShowtimes)}" class="alert alert-light border text-center py-4 text-muted">
             Hiện chưa có suất chiếu nào sắp tới cho phim này.
         </div>
     </section>

@@ -194,12 +194,6 @@
             opacity: 0.85;
         }
 
-        /* ===== Trạng thái rỗng ===== */
-        .alert-dark {
-            background-color: #f9fafb;
-            border: 1px dashed #d1d5db;
-            color: #6b7280;
-        }
 
         /* Tiêu đề trang - đồng bộ chữ đen như ảnh mẫu, giữ gạch đỏ nhấn */
         .page-title {
@@ -280,7 +274,7 @@
                 </p>
             </div>
 
-            <div th:if="${selectedCinema == null}" class="alert alert-dark text-center py-4">
+            <div th:if="${selectedCinema == null}" class="alert alert-light border text-center py-4" style="color: #6b7280;">
                 Vui lòng chọn khu vực và rạp chiếu để xem lịch chiếu.
             </div>
 
@@ -337,6 +331,10 @@
 
 
                         <!-- giờ chiếu -->
+                        <div th:if="${#lists.isEmpty(ms.screenGroups())}" class="text-muted small mt-2">
+                            <i class="fa-regular fa-clock me-1"></i>Chưa có suất chiếu cho ngày này
+                        </div>
+
                         <div th:each="group : ${ms.screenGroups()}">
 
                             <div class="screen-group-label"
@@ -375,7 +373,7 @@
             </div>
 
             <div th:if="${selectedCinema != null and #lists.isEmpty(schedule)}"
-                 class="alert alert-dark text-center py-4">
+                 class="alert alert-light border text-center py-4" style="color: #6b7280;">
                 Rạp này chưa có suất chiếu nào trong ngày đã chọn.
             </div>
 

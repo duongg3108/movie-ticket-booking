@@ -14,7 +14,7 @@
     </div>
 
     <section id="now-showing" class="mb-5">
-        <h2 class="h3 fw-bold text-light mb-4 border-start border-4 border-danger ps-3">Phim Đang Chiếu</h2>
+        <h2 class="h3 fw-bold text-dark mb-4 border-start border-4 border-danger ps-3">Phim Đang Chiếu</h2>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${not #lists.isEmpty(nowShowingMovies)}">
             <div class="col" th:each="movie : ${nowShowingMovies}">
                 <div class="card h-100 bg-light text-dark border-0 shadow-sm card-hover" style="border-radius: 12px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
@@ -36,7 +36,7 @@
     </section>
 
     <section id="coming-soon">
-        <h2 class="h3 fw-bold text-light mb-4 border-start border-4 border-warning ps-3">Phim Sắp Chiếu</h2>
+        <h2 class="h3 fw-bold text-dark mb-4 border-start border-4 border-warning ps-3">Phim Sắp Chiếu</h2>
         <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" th:if="${not #lists.isEmpty(comingSoonMovies)}">
             <div class="col" th:each="movie : ${comingSoonMovies}">
                 <div class="card h-100 bg-light text-dark border-0 shadow-sm card-hover" style="border-radius: 12px; overflow: hidden; opacity: 0.85; transition: transform 0.3s, box-shadow 0.3s;">
