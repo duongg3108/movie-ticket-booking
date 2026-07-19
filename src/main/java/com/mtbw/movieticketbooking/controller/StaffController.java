@@ -50,7 +50,7 @@ public class StaffController {
 
     // 4. Xử lý yêu cầu duyệt Booking (POST)
     @PostMapping("/bookings/confirm")
-    public String confirmBooking(@RequestParam("bookingId") Long bookingId, Principal principal) {
+    public String confirmBooking(@RequestParam("bookingId") Long bookingId, Principal principal , RedirectAttributes redirectAttributes) {
         // Lấy email của tài khoản nhân viên đang đăng nhập hiện tại
         String email = principal.getName();
 
@@ -60,6 +60,13 @@ public class StaffController {
 
         // Gọi service xử lý duyệt
         bookingService.confirmBooking(bookingId, staff);
+
+        // 2. Lấy danh sách các vé con vừa duyệt thành công
+        List<BookingSeat> seats = bookingService.getBookingSeats(bookingId);
+
+        // 3. Gửi danh sách vé và thông báo thành công sang trang tiếp theo
+        redirectAttributes.addFlashAttribute("successMessage", "Duyệt đơn đặt vé thành công!");
+        redirectAttributes.addFlashAttribute("confirmedSeats", seats);
 
         // Quay lại trang danh sách sau khi duyệt thành công
         return "redirect:/staff/bookings?success";
