@@ -161,7 +161,7 @@ public class BookingController {
         return "BookingSuccess";
     }
 
-    // UC05 - Booking History: hien thi danh sach don dat ve cua customer dang dang nhap.
+    // Booking History: hien thi danh sach don dat ve cua customer dang dang nhap.
     @GetMapping("/history")
     public String history(Authentication authentication, Model model) {
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
@@ -170,7 +170,7 @@ public class BookingController {
         return "customer/booking-history";
     }
 
-    // UC10 - Cancel Ticket: huy ve PENDING truoc gio chieu.
+    // Cancel Ticket: huy ve PENDING truoc gio chieu.
     @PostMapping("/{bookingId}/cancel")
     public String cancel(@PathVariable Long bookingId,
                          Authentication authentication,
