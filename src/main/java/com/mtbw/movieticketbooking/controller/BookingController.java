@@ -184,7 +184,6 @@ public class BookingController {
         }
         return "redirect:/booking/history";
     }
-
     // VietQR "quick link" API - khong can API key, tra ve thang anh PNG de nhung vao <img>.
     // Doc them: https://www.vietqr.io/danh-sach-api/link-tao-nhanh-ma-vietqr/
     private String buildVietQrUrl(long amount, String content) {

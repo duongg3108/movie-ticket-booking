@@ -9,28 +9,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ShowtimeService {
-
-    // ===== Booking / Schedule =====
-    List<MovieSchedule> getScheduleByCinemaAndDate(Long cinemaId, LocalDate date);
-
-    List<Showtime> findUpcomingByMovie(Long movieId);
-
-    // ===== Admin Showtime Management =====
     List<Showtime> findAll();
-
     Optional<Showtime> findById(Long id);
-
     List<Showtime> findByMovieId(Long movieId);
-
     List<Showtime> findByCinemaId(Long cinemaId);
-
-    List<Showtime> findByMovieIdAndStartTimeBetween(
-            Long movieId,
-            LocalDateTime start,
-            LocalDateTime end
-    );
-
+    List<Showtime> findByMovieIdAndStartTimeBetween(Long movieId, LocalDateTime start, LocalDateTime end);
     Showtime save(Showtime showtime);
-
     void deleteById(Long id);
+
+    /**
+     * Lich chieu cua 1 rap trong 1 ngay, da gom theo phim va theo loai phong (screenType),
+     * gio va gia da duoc format san (vd "18:00", "55K").
+     */
+    List<MovieSchedule> getScheduleByCinemaAndDate(Long cinemaId, LocalDate date);
+    List<Showtime> findUpcomingByMovie(Long movieId);
+    // Hàm lấy danh sách các suất chiếu diễn ra trong ngày hôm nay
+    List<Showtime> getTodayShowtimes();
 }

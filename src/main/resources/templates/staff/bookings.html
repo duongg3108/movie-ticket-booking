@@ -7,6 +7,30 @@
 <div th:replace="~{layout/header :: navbar}"></div>
 
 <main class="container my-5">
+    <!-- Khung thông báo duyệt thành công kèm danh sách mã vé để copy/soát -->
+    <div th:if="${successMessage}" class="alert alert-success border-0 shadow-sm p-4 mb-4" style="border-radius: 12px;">
+        <h5 class="fw-bold text-success mb-2"><i class="fa-solid fa-circle-check me-2"></i>Duyệt Thành Công!</h5>
+        <p class="text-muted mb-3" th:text="${successMessage}"></p>
+
+        <div th:if="${confirmedSeats != null and not #lists.isEmpty(confirmedSeats)}">
+            <h6 class="fw-bold text-dark mb-2">Danh sách vé vừa được duyệt:</h6>
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-4" th:each="seat : ${confirmedSeats}">
+                    <div class="p-3 bg-light border rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold text-danger" th:text="${seat.seat.seatCode}">C2</span>
+                            <small class="text-muted ms-2" th:text="${'(' + seat.seat.seatType + ')'}"></small>
+                            <div class="font-monospace text-secondary small mt-1" th:text="${seat.ticketCode}">Mã vé</div>
+                        </div>
+                        <!-- Link trỏ thẳng sang trang soát vé và điền sẵn mã vé -->
+                        <a th:href="@{/staff/tickets(ticketCode=${seat.ticketCode})}" class="btn btn-sm btn-outline-info fw-bold">
+                            <i class="fa-solid fa-qrcode me-1"></i>Soát vé
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4 fw-bold border-start border-4 border-danger ps-3" style="color: #212529;">
             <i ></i>Yêu Cầu Duyệt Booking (Đã Thanh Toán)

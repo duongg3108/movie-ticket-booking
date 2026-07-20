@@ -9,16 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CinemaService {
-
-    List<CityOption> findCityOptions();
-
     List<Cinema> findAll();
-
+    List<CityOption> findCityOptions();
     List<Cinema> findByCity(String city);
-
     List<Cinema> findByChainId(Long chainId);
-
     Optional<Cinema> findById(Long id);
 
+    // Gom danh sach rap theo he thong rap (chain) that su co trong DB, sap xep theo ten chain
+    // -> dung de render cot "Rap chieu" giong Moveek (nhom theo Beta Cinemas, CGV, ...)
     LinkedHashMap<CinemaChain, List<Cinema>> groupByChain(List<Cinema> cinemas);
 }

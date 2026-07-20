@@ -5,11 +5,7 @@ import com.mtbw.movieticketbooking.enums.SeatCellStatus;
 import com.mtbw.movieticketbooking.dto.SeatMapPageDto;
 import com.mtbw.movieticketbooking.dto.SeatMapRowDto;
 import com.mtbw.movieticketbooking.entity.*;
-import com.mtbw.movieticketbooking.enums.BookingSeatStatus;
-import com.mtbw.movieticketbooking.enums.BookingStatus;
-import com.mtbw.movieticketbooking.enums.PaymentMethod;
-import com.mtbw.movieticketbooking.enums.PaymentStatus;
-import com.mtbw.movieticketbooking.enums.ScreenType;
+import com.mtbw.movieticketbooking.enums.*;
 import com.mtbw.movieticketbooking.repository.*;
 import com.mtbw.movieticketbooking.service.BookingService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -38,26 +35,7 @@ public class BookingServiceImpl implements BookingService {
     private final PaymentRepository paymentRepository;
 
     @Override
-    public List<Booking> getBookingHistory(Long userId) {
-        return null;
-    }
 
-    @Override
-    public boolean cancelBooking(Long bookingId) {
-        return false;
-    }
-
-    @Override
-    public void updatePaymentSuccess(Long bookingId) {
-
-    }
-
-    @Override
-    public Booking getBookingById(Long id) {
-        return null;
-    }
-
-    @Override
     @Transactional
     public SeatMapPageDto buildSeatMap(Long showtimeId) {
         // Don rac: cac ghe HELD nhung da qua expiresAt phai duoc "tha" that su trong DB
@@ -191,6 +169,36 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public List<Booking> getPendingBookings() {
+        // Lấy tất cả booking có trạng thái PAID để duyệt
+        return bookingRepository.findByStatusOrderByCreatedAtDesc(BookingStatus.PAID);
+    }
+
+    @Override
+    @Transactional // Đảm bảo tính toàn vẹn dữ liệu khi cập nhật nhiều bảng
+    public void confirmBooking(Long bookingId, User staff) {
+        // 1. Tìm booking theo ID
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy mã đặt vé này!"));
+
+        // 2. Kiểm tra nếu booking đang ở trạng thái PAID thì mới duyệt
+        if (booking.getStatus() == BookingStatus.PAID) {
+            // Cập nhật trạng thái booking sang CONFIRMED
+            booking.setStatus(BookingStatus.CONFIRMED);
+            booking.setConfirmedBy(staff);
+            booking.setConfirmedAt(LocalDateTime.now());
+            bookingRepository.save(booking);
+
+            // 3. Cập nhật toàn bộ vé liên quan trong bảng booking_seats sang trạng thái BOOKED
+            List<BookingSeat> seats = bookingSeatRepository.findByBookingId(bookingId);
+            for (BookingSeat seat : seats) {
+                seat.setStatus(BookingSeatStatus.BOOKED);
+                bookingSeatRepository.save(seat);
+            }
+        }
+    }
+
+    @Override
     @Transactional
     public Booking payBooking(Long bookingId, PaymentMethod method) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -234,6 +242,38 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.PAID);
         booking.setPaidAt(now);
         return bookingRepository.save(booking);
+    }
+
+    @Override
+    @Transactional
+    public BookingSeat validateTicket(String ticketCode) {
+        // 1. Tìm vé theo mã ticket_code
+        BookingSeat ticket = bookingSeatRepository.findByTicketCode(ticketCode)
+                .orElseThrow(() -> new IllegalArgumentException("Mã vé không tồn tại trên hệ thống!"));
+
+        // 2. Kiểm tra trạng thái của đơn đặt vé cha (Booking)
+        Booking booking = ticket.getBooking();
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new IllegalStateException("Đơn hàng chứa vé này chưa được thanh toán hoặc xác nhận!");
+        }
+
+        // 3. Kiểm tra trạng thái của chính chiếc vé đó (BookingSeat)
+        switch (ticket.getStatus()) {
+            case USED:
+                throw new IllegalStateException("Vé này đã được sử dụng để vào phòng chiếu trước đó!");
+            case CANCELLED:
+                throw new IllegalStateException("Vé này đã bị hủy!");
+            case EXPIRED:
+                throw new IllegalStateException("Vé này đã hết hạn!");
+            case HELD:
+                throw new IllegalStateException("Vé này chưa được thanh toán hoàn tất!");
+            case BOOKED:
+                // Trạng thái hợp lệ -> Cập nhật sang USED (Đã sử dụng)
+                ticket.setStatus(BookingSeatStatus.USED);
+                return bookingSeatRepository.save(ticket);
+            default:
+                throw new IllegalStateException("Trạng thái vé không hợp lệ!");
+        }
     }
 
     @Override

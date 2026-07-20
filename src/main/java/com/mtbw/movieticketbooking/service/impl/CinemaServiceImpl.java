@@ -19,13 +19,13 @@ public class CinemaServiceImpl implements CinemaService {
     private final CinemaRepository cinemaRepository;
 
     @Override
-    public List<CityOption> findCityOptions() {
-        return cinemaRepository.findCityOptions();
+    public List<Cinema> findAll() {
+        return cinemaRepository.findAll();
     }
 
     @Override
-    public List<Cinema> findAll() {
-        return cinemaRepository.findAll();
+    public List<CityOption> findCityOptions() {
+        return cinemaRepository.findCityOptions();
     }
 
     @Override
@@ -45,6 +45,8 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public LinkedHashMap<CinemaChain, List<Cinema>> groupByChain(List<Cinema> cinemas) {
+        // Gom thu cong theo chainId (khong dung CinemaChain lam key truc tiep trong
+        // Collectors.groupingBy vi entity chua override equals()/hashCode()).
         LinkedHashMap<Long, List<Cinema>> byChainId = new LinkedHashMap<>();
         LinkedHashMap<Long, CinemaChain> chainCache = new LinkedHashMap<>();
 
@@ -58,7 +60,6 @@ public class CinemaServiceImpl implements CinemaService {
         for (Long chainId : byChainId.keySet()) {
             result.put(chainCache.get(chainId), byChainId.get(chainId));
         }
-
         return result;
     }
 }

@@ -1,7 +1,7 @@
 package com.mtbw.movieticketbooking.service;
-
 import com.mtbw.movieticketbooking.dto.SeatMapPageDto;
 import com.mtbw.movieticketbooking.entity.Booking;
+import com.mtbw.movieticketbooking.entity.User;
 import com.mtbw.movieticketbooking.entity.BookingSeat;
 import com.mtbw.movieticketbooking.entity.Payment;
 import com.mtbw.movieticketbooking.enums.PaymentMethod;
@@ -9,7 +9,12 @@ import com.mtbw.movieticketbooking.enums.PaymentMethod;
 import java.util.List;
 
 public interface BookingService {
+    // Lấy danh sách booking đang ở trạng thái PAID
+    List<Booking> getPendingBookings();
 
+    // Duyệt booking sang trạng thái CONFIRMED bởi nhân viên (staff)
+    void confirmBooking(Long bookingId, User staff);
+    BookingSeat validateTicket(String ticketCode);
     /**
      * Dung du lieu that trong Room/Seat + BookingSeat cua suat chieu de dung seat map:
      * ghe nao trong, ghe nao dang bi giu/da ban, vi tri nao khong co ghe (loi di).
@@ -34,7 +39,6 @@ public interface BookingService {
     Booking payBooking(Long bookingId, PaymentMethod method);
 
     Payment getPayment(Long bookingId);
-
     /**
      * UC05 – Lay danh sach don dat ve cua customer, sap xep moi nhat truoc.
      */
