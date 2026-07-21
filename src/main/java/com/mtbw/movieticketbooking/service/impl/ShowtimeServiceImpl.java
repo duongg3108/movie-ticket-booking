@@ -85,34 +85,24 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         List<Showtime> showtimes = showtimeRepository
                 .findByRoom_Cinema_IdAndStartTimeBetweenOrderByStartTimeAsc(cinemaId, start, end);
 
-        // Group showtimes by movieId
+        // Group non-cancelled showtimes by movieId, preserving insertion order
         LinkedHashMap<Long, List<Showtime>> byMovieId = new LinkedHashMap<>();
+        LocalDateTime now = LocalDateTime.now();
         for (Showtime s : showtimes) {
             if (s.getStatus() == ShowtimeStatus.CANCELLED) continue;
-            Long movieId = s.getMovie().getId();
-            byMovieId.computeIfAbsent(movieId, k -> new ArrayList<>()).add(s);
-        }
-
-        // Fetch all active movies (NOW_SHOWING)
-        List<Movie> activeMovies = movieRepository.findByStatus(MovieStatus.NOW_SHOWING);
-
-        // Union of active movies + any other movie that has showtimes on this date
-        LinkedHashMap<Long, Movie> moviesToInclude = new LinkedHashMap<>();
-        for (Movie m : activeMovies) {
-            moviesToInclude.put(m.getId(), m);
-        }
-        for (Showtime s : showtimes) {
-            if (s.getStatus() == ShowtimeStatus.CANCELLED) continue;
+            // Skip showtimes that have already started
+            if (s.getStartTime().isBefore(now)) continue;
+            // Skip movies that are ENDED or HIDDEN
             Movie m = s.getMovie();
-            if (m.getStatus() != MovieStatus.ENDED && m.getStatus() != MovieStatus.HIDDEN) {
-                moviesToInclude.putIfAbsent(m.getId(), m);
-            }
+            if (m.getStatus() == MovieStatus.ENDED || m.getStatus() == MovieStatus.HIDDEN) continue;
+            byMovieId.computeIfAbsent(m.getId(), k -> new ArrayList<>()).add(s);
         }
 
+        // Only build schedule for movies that actually have valid showtimes
         List<MovieSchedule> result = new ArrayList<>();
-        for (Long movieId : moviesToInclude.keySet()) {
-            Movie movie = moviesToInclude.get(movieId);
-            List<Showtime> movieShowtimes = byMovieId.getOrDefault(movieId, new ArrayList<>());
+        for (var entry : byMovieId.entrySet()) {
+            List<Showtime> movieShowtimes = entry.getValue();
+            Movie movie = movieShowtimes.get(0).getMovie();
 
             LinkedHashMap<ScreenType, List<ShowtimeSlot>> byScreenType = new LinkedHashMap<>();
             for (Showtime s : movieShowtimes) {

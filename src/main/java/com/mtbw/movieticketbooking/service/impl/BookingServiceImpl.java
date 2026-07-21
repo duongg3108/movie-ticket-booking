@@ -43,6 +43,10 @@ public class BookingServiceImpl implements BookingService {
         Showtime showtime = showtimeRepository.findById(showtimeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Khong tim thay suat chieu"));
 
+        if (showtime.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Suất chiếu này đã bắt đầu hoặc đã diễn ra, không thể đặt vé");
+        }
+
         Room room = showtime.getRoom();
         List<Seat> seats = seatRepository.findByRoomId(room.getId());
 
@@ -107,6 +111,11 @@ public class BookingServiceImpl implements BookingService {
 
         Showtime showtime = showtimeRepository.findById(showtimeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Khong tim thay suat chieu"));
+
+        if (showtime.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Suất chiếu này đã bắt đầu hoặc đã diễn ra, không thể đặt vé");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Khong tim thay nguoi dung"));
 

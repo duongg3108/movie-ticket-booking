@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -43,9 +44,17 @@ public class BookingController {
     private String accountName;
 
     @GetMapping("/{showtimeId}")
-    public String seatMap(@PathVariable Long showtimeId, Model model) {
-        model.addAttribute("seatMap", bookingService.buildSeatMap(showtimeId));
-        return "SeatMap";
+    public String seatMap(@PathVariable Long showtimeId, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            model.addAttribute("seatMap", bookingService.buildSeatMap(showtimeId));
+            return "SeatMap";
+        } catch (IllegalStateException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/showtime";
+        } catch (ResponseStatusException ex) {
+            redirectAttributes.addFlashAttribute("error", ex.getReason());
+            return "redirect:/showtime";
+        }
     }
 
     @PostMapping("/{showtimeId}/hold")

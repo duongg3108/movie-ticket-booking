@@ -11,12 +11,12 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <h1 class="h3 fw-bold text-dark mb-1">
-                <i class="fa-solid fa-clapperboard me-2" style="color: #e11d48;"></i>Quản Lý Phim
+                Quản Lý Phim
             </h1>
             <p class="text-muted mb-0 small">Quản lý danh sách phim, thêm mới, chỉnh sửa và ẩn phim trong hệ thống.</p>
         </div>
         <a href="/admin/movies/new" class="btn btn-accent">
-            <i class="fa-solid fa-plus me-2"></i>Thêm Phim Mới
+            Thêm Phim Mới
         </a>
     </div>
 
@@ -40,27 +40,27 @@
                 <a th:href="@{/admin/movies}"
                    th:classappend="${currentStatus == null ? ' active' : ''}"
                    class="tab-btn">
-                    <i class="fa-solid fa-border-all me-1"></i> Tất cả
+                     Tất cả
                 </a>
                 <a th:href="@{/admin/movies(status='NOW_SHOWING')}"
                    th:classappend="${currentStatus == 'NOW_SHOWING' ? ' active' : ''}"
                    class="tab-btn">
-                    <i class="fa-solid fa-play me-1"></i> Đang chiếu
+                     Đang chiếu
                 </a>
                 <a th:href="@{/admin/movies(status='COMING_SOON')}"
                    th:classappend="${currentStatus == 'COMING_SOON' ? ' active' : ''}"
                    class="tab-btn">
-                    <i class="fa-solid fa-clock me-1"></i> Sắp chiếu
+                     Sắp chiếu
                 </a>
                 <a th:href="@{/admin/movies(status='ENDED')}"
                    th:classappend="${currentStatus == 'ENDED' ? ' active' : ''}"
                    class="tab-btn">
-                    <i class="fa-solid fa-square-check me-1"></i> Đã kết thúc
+                     Đã kết thúc
                 </a>
                 <a th:href="@{/admin/movies(status='HIDDEN')}"
                    th:classappend="${currentStatus == 'HIDDEN' ? ' active' : ''}"
                    class="tab-btn">
-                    <i class="fa-solid fa-eye-slash me-1"></i> Đã ẩn
+                     Đã ẩn
                 </a>
             </div>
 
@@ -109,8 +109,6 @@
                         </td>
                         <td>
                             <div class="fw-bold text-dark" th:text="${movie.title}">Tên Phim</div>
-                            <small class="text-muted d-block text-truncate" style="max-width: 280px;"
-                                   th:text="${movie.description != null ? movie.description : '—'}">Mô tả</small>
                         </td>
                         <td class="text-muted" th:text="${movie.genre != null ? movie.genre : '—'}">Thể loại</td>
                         <td class="text-center">

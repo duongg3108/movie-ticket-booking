@@ -1,10 +1,10 @@
 package com.mtbw.movieticketbooking.controller;
 
-import com.mtbw.movieticketbooking.entity.Cinema;
-import com.mtbw.movieticketbooking.entity.Movie;
-import com.mtbw.movieticketbooking.entity.Room;
-import com.mtbw.movieticketbooking.entity.Showtime;
+import com.mtbw.movieticketbooking.entity.*;
 import com.mtbw.movieticketbooking.enums.ShowtimeStatus;
+import com.mtbw.movieticketbooking.repository.BookingRepository;
+import com.mtbw.movieticketbooking.repository.BookingSeatRepository;
+import com.mtbw.movieticketbooking.repository.PaymentRepository;
 import com.mtbw.movieticketbooking.service.CinemaService;
 import com.mtbw.movieticketbooking.service.MovieService;
 import com.mtbw.movieticketbooking.service.RoomService;
@@ -12,6 +12,7 @@ import com.mtbw.movieticketbooking.service.ShowtimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -31,6 +32,9 @@ public class AdminShowtimeController {
     private final MovieService movieService;
     private final CinemaService cinemaService;
     private final RoomService roomService;
+    private final BookingSeatRepository bookingSeatRepository;
+    private final BookingRepository bookingRepository;
+    private final PaymentRepository paymentRepository;
 
     @ModelAttribute("activePage")
     public String activePage() {
@@ -209,12 +213,26 @@ public class AdminShowtimeController {
 
     // ==================== XÓA LỊCH CHIẾU ====================
     @PostMapping("/delete/{id}")
+    @Transactional
     public String deleteShowtime(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
+            // Lấy danh sách booking liên quan đến showtime
+            List<Booking> bookings = bookingRepository.findByShowtimeId(id);
+            List<Long> bookingIds = bookings.stream().map(Booking::getId).collect(Collectors.toList());
+
+            // 1. Xóa payments liên quan đến các bookings
+            if (!bookingIds.isEmpty()) {
+                paymentRepository.deleteAll(paymentRepository.findByBookingIdIn(bookingIds));
+            }
+            // 2. Xóa tất cả booking_seats liên quan đến showtime
+            bookingSeatRepository.deleteAll(bookingSeatRepository.findByShowtimeId(id));
+            // 3. Xóa tất cả bookings liên quan đến showtime
+            bookingRepository.deleteAll(bookings);
+            // 4. Cuối cùng xóa showtime
             showtimeService.deleteById(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã xóa lịch chiếu thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa lịch chiếu này (có thể do đã có khách đặt vé)!");
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa lịch chiếu: " + e.getMessage());
         }
         return "redirect:/admin/showtimes";
     }

@@ -162,42 +162,55 @@
         const endTimeInput = document.getElementById("endTime");
         const movieDurationText = document.getElementById("selectedMovieDurationText");
 
-        // --- Room Dynamic Filter based on Cinema Selection ---
+        // --- Lưu toàn bộ room data vào mảng JS khi load trang ---
+        const allRooms = [];
+        const roomOptions = roomSelect.querySelectorAll("option[data-cinema-id]");
+        roomOptions.forEach(function(opt) {
+            allRooms.push({
+                id: opt.value,
+                cinemaId: opt.getAttribute("data-cinema-id"),
+                text: opt.textContent,
+                selected: opt.selected
+            });
+        });
+
+        // Lưu lại giá trị room đang chọn (cho flow Edit)
+        const initialRoomId = roomSelect.value;
+
+        // --- Room Dynamic Filter: Xây lại options thay vì ẩn/hiện ---
         function filterRooms() {
             const selectedCinemaId = cinemaSelect.value;
-            const roomOptions = roomSelect.options;
-            
-            let firstAvailableSelected = false;
-            let currentSelectedStillValid = false;
-            const currentSelectedValue = roomSelect.value;
 
-            for (let i = 0; i < roomOptions.length; i++) {
-                const option = roomOptions[i];
-                const optionCinemaId = option.getAttribute("data-cinema-id");
+            // Xóa hết options cũ, chỉ giữ placeholder
+            roomSelect.innerHTML = '<option value="">-- Chọn phòng --</option>';
 
-                if (!optionCinemaId) {
-                    // Option: -- Chọn phòng --
-                    option.style.display = "";
-                    continue;
+            // Thêm lại các phòng thuộc rạp đang chọn
+            allRooms.forEach(function(room) {
+                if (selectedCinemaId === "" || room.cinemaId === selectedCinemaId) {
+                    const option = document.createElement("option");
+                    option.value = room.id;
+                    option.textContent = room.text;
+                    option.setAttribute("data-cinema-id", room.cinemaId);
+                    roomSelect.appendChild(option);
                 }
+            });
 
-                if (selectedCinemaId === "" || optionCinemaId === selectedCinemaId) {
-                    option.style.display = "";
-                    if (option.value === currentSelectedValue) {
-                        currentSelectedStillValid = true;
+            // Khôi phục lại room đã chọn nếu còn trong danh sách (cho flow Edit)
+            if (initialRoomId) {
+                for (let i = 0; i < roomSelect.options.length; i++) {
+                    if (roomSelect.options[i].value === initialRoomId) {
+                        roomSelect.value = initialRoomId;
+                        break;
                     }
-                } else {
-                    option.style.display = "none";
                 }
-            }
-
-            // Nếu phòng hiện tại không còn hiển thị thì đặt lại về trống
-            if (!currentSelectedStillValid) {
-                roomSelect.value = "";
             }
         }
 
-        cinemaSelect.addEventListener("change", filterRooms);
+        cinemaSelect.addEventListener("change", function() {
+            // Khi admin chủ động thay đổi rạp, reset room selection
+            filterRooms();
+            roomSelect.value = "";
+        });
         // Chạy filterRooms lần đầu (phục vụ flow Edit)
         filterRooms();
 

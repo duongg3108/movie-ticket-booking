@@ -210,6 +210,13 @@
         <i class="fa-solid fa-calendar-days me-2"></i>Lịch Chiếu Phim
     </h2>
 
+    <!-- Error Alert -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show border-0 rounded-3 mb-4 shadow-sm" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        <strong th:text="${error}">Lỗi!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <div class="row g-3">
 
         <!-- ===== Cột 1: Khu vực ===== -->

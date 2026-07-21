@@ -73,7 +73,7 @@
                 <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
                 <li class="nav-item"><a class="nav-link" href="/showtime">Lịch chiếu &amp; Phim</a></li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link" href="/admin/movies" style="color: #f59e0b !important;"><i class="fa-solid fa-gear me-1"></i>Quản lý (Admin)</a>
+                    <a class="nav-link" href="/admin/movies" style="color: #e11d48 !important;">Quản lý (Admin)</a>
                 </li>
                 <!-- Staff Menu Items -->
                 <li class="nav-item" sec:authorize="hasRole('STAFF')">
@@ -96,8 +96,8 @@
                         <i class="fa-solid fa-user me-1"></i><span sec:authentication="name">User</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/booking/history">Lịch sử đặt vé</a></li>
-                        <li><hr class="dropdown-divider"></li>
+
+
                         <li>
                             <form th:action="@{/logout}" method="post">
                                 <button class="dropdown-item text-danger" type="submit"><i class="fa-solid fa-right-from-bracket me-1"></i>Đăng xuất</button>

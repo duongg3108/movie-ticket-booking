@@ -213,28 +213,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/cinemas">
-                        Rạp chiếu
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" th:classappend="${activePage == 'showtimes' ? ' active' : ''}" href="/admin/showtimes">
                         Lịch chiếu
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/users">
-                        Người dùng
-                    </a>
-                </li>
             </ul>
             <div class="d-flex align-items-center gap-3">
-                <a href="/" class="btn btn-outline-dark btn-sm">
-                    Xem trang chủ
-                </a>
                 <div sec:authorize="isAuthenticated()" class="dropdown">
                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-user-shield me-1"></i><span sec:authentication="name">Admin</span>
+                        <span sec:authentication="name">Admin</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
